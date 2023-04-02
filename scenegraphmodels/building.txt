@@ -1,0 +1,73 @@
+import wall scenegraphmodels/wall.txt
+instance box models/box.obj
+instance cylinder models/cylinder.obj
+instance cone models/cone.obj
+
+# material definitions here.
+material wall-mat
+ambient 0.55 0.16 0.13
+diffuse 0.55 0.16 0.13
+end-material
+
+material turret-mat
+ambient 0.55 0.3 0.12
+diffuse 0.55 0.3 0.12
+end-material
+
+material roof-mat
+ambient 0.9 0.4 0.11
+diffuse 0.9 0.4 0.11
+specular 1 1 1
+end-material
+
+group root root
+assign-root root
+
+# first wall
+add-child wall root
+
+# second wall
+rotate r-wall1 r-wall1 90 0 1 0
+add-child r-wall1 root
+translate t-wall1 t-wall1 29 0 -30
+add-child t-wall1 r-wall1
+add-child wall t-wall1
+
+# third wall
+translate t-wall2 t-wall2 0 0 -58
+add-child t-wall2 root
+add-child wall t-wall2
+
+# fourth wall
+rotate r-wall2 r-wall2 90 0 1 0
+add-child r-wall2 root
+translate t-wall3 t-wall3 29 0 30
+add-child t-wall3 r-wall2
+add-child wall t-wall3
+
+# add a ceiling
+translate t-ceiling t-ceiling 0 30 -30
+add-child t-ceiling root
+scale s-ceiling s-ceiling 58 2 58
+add-child s-ceiling t-ceiling
+leaf ceiling ceiling instanceof box
+assign-material ceiling wall-mat
+add-child ceiling s-ceiling
+
+# add a cylinder "tower" structure
+translate t-turret t-turret 0 30 -30
+add-child t-turret root
+scale s-turret s-turret 15 50 15
+add-child s-turret t-turret
+leaf turret turret instanceof cylinder
+assign-material turret turret-mat
+add-child turret s-turret
+
+# a roof for our tower
+translate t-roof t-roof 0 80 -30
+add-child t-roof root
+scale s-roof s-roof 25 20 25
+add-child s-roof t-roof
+leaf roof roof instanceof cone
+assign-material roof roof-mat
+add-child roof s-roof

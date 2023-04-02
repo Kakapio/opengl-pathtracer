@@ -1,0 +1,44 @@
+instance box models/box.obj
+import human-1 scenegraphmodels/posed-humanoid-1.txt
+import human-2 scenegraphmodels/posed-humanoid-2.txt
+import build scenegraphmodels/building.txt
+
+# material definitions here.
+material ground
+ambient 0.55 0.48 0.26
+diffuse 0.55 0.48 0.26
+end-material
+
+# root of our scene.
+group root root
+assign-root root
+
+# our box platform.
+scale scalebase scalebase 200 3 200
+add-child scalebase root
+
+leaf base base instanceof box
+
+assign-material base ground
+add-child base scalebase
+
+# our first person
+translate t-human-1 t-human-1 -30 65 0
+add-child t-human-1 root
+scale s-human-1 s-human-1 40 40 40
+add-child s-human-1 t-human-1
+add-child human-1 s-human-1
+
+# our second person
+translate t-human-2 t-human-2 -20 1 50
+add-child t-human-2 root
+scale s-human-2 s-human-2 40 40 40
+add-child s-human-2 t-human-2
+add-child human-2 s-human-2
+
+# wall
+translate t-building t-building -10 33 0
+add-child t-building root
+rotate r-building r-building 14 0 1 0
+add-child r-building t-building
+add-child build r-building

@@ -1,0 +1,70 @@
+instance box models/box.obj
+
+# material definitions here.
+material wall-mat
+ambient 0.55 0.16 0.13
+diffuse 0.55 0.16 0.13
+end-material
+
+group root root
+assign-root root
+
+# left portion ===================
+translate t-left t-left -20 0 0
+add-child t-left root
+
+scale s-left s-left 20 65 2
+add-child s-left t-left
+
+leaf left left instanceof box
+assign-material left wall-mat
+add-child left s-left
+
+# right portion ==================
+translate t-right t-right 20 0 0
+add-child t-right root
+
+scale s-right s-right 20 65 2
+add-child s-right t-right
+
+leaf right right instanceof box
+assign-material right wall-mat
+add-child right s-right
+
+# middle portion =================
+translate t-middle t-middle 0 20 0
+add-child t-middle root
+
+scale s-middle s-middle 20 25 2
+add-child s-middle t-middle
+
+leaf middle middle instanceof box
+assign-material middle wall-mat
+add-child middle s-middle
+
+# decoration portion =================
+translate t-dec1 t-dec1 -28 34 0
+add-child t-dec1 root
+
+scale s-dec1 s-dec1 4 4 2
+add-child s-dec1 t-dec1
+
+leaf dec1 dec1 instanceof box
+assign-material dec1 wall-mat
+add-child dec1 s-dec1
+
+# decoration portion =================
+translate t-dec2 t-dec2 28 34 0
+add-child t-dec2 root
+
+scale s-dec2 s-dec2 4 4 2
+add-child s-dec2 t-dec2
+
+leaf dec2 dec2 instanceof box
+assign-material dec2 wall-mat
+add-child dec2 s-dec2
+
+texture tex-brick textures/paving-1.ppm
+assign-texture left tex-brick
+assign-texture right tex-brick
+assign-texture middle tex-brick
