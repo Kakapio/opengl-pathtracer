@@ -32,7 +32,7 @@ View::~View(){
 void View::init(Callbacks *callbacks, Model& model) 
 {
     if (!glfwInit())
-        exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE);
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -42,36 +42,36 @@ void View::init(Callbacks *callbacks, Model& model)
     window = glfwCreateWindow(800, 800, "Hello GLFW: Per-vertex coloring", NULL, NULL);
     if (!window)
     {
-        glfwTerminate();
-        exit(EXIT_FAILURE);
+      glfwTerminate();
+      exit(EXIT_FAILURE);
     }
-     glfwSetWindowUserPointer(window, (void *)callbacks);
+    glfwSetWindowUserPointer(window, (void *)callbacks);
 
     //using C++ functions as callbacks to a C-style library
     glfwSetKeyCallback(window, 
-    [](GLFWwindow* window, int key, int scancode, int action, int mods)
-    {
+        [](GLFWwindow* window, int key, int scancode, int action, int mods)
+        {
         reinterpret_cast<Callbacks*>(glfwGetWindowUserPointer(window))->onkey(key,scancode,action,mods);
-    });
+        });
 
     glfwSetWindowSizeCallback(window, 
-    [](GLFWwindow* window, int width,int height)
-    {
+        [](GLFWwindow* window, int width,int height)
+        {
         reinterpret_cast<Callbacks*>(glfwGetWindowUserPointer(window))->reshape(width,height);
-    });
+        });
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     glfwSetCursorPosCallback(window, 
-    [](GLFWwindow* window, double xpos, double ypos)
-    {
+        [](GLFWwindow* window, double xpos, double ypos)
+        {
         reinterpret_cast<Callbacks*>(glfwGetWindowUserPointer(window))->mousePosition(xpos,ypos);
-    });
+        });
 
     glfwSetMouseButtonCallback(window,
-    [](GLFWwindow* window, int button, int action, int mods)
-    {
+        [](GLFWwindow* window, int button, int action, int mods)
+        {
         reinterpret_cast<Callbacks*>(glfwGetWindowUserPointer(window))->mouseButton(button, action, mods);
-    });
+        });
 
     glfwMakeContextCurrent(window);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
@@ -79,7 +79,7 @@ void View::init(Callbacks *callbacks, Model& model)
 
     // create the shader program
     program.createProgram(string("shaders/phong-multiple.vert.glsl"),
-                          string("shaders/phong-spot.frag.glsl"));
+        string("shaders/phong-spot.frag.glsl"));
     // assuming it got created, get all the shader variables that it uses
     // so we can initialize them at some point
     // enable the shader program
@@ -96,13 +96,11 @@ void View::init(Callbacks *callbacks, Model& model)
     time = glfwGetTime();
     deltaTime = 0;
 
-    renderer = new sgraph::GLScenegraphRenderer(modelview,objects,textureIds,shaderLocations);
-    raycastRenderer = new sgraph::RaycastRenderer(modelview,objects);
+    if (useRaycast)
+      raycastRenderer = new sgraph::RaycastRenderer(modelview,objects,"render.ppm");
+    else 
+      renderer = new sgraph::GLScenegraphRenderer(modelview,objects,textureIds,shaderLocations);
 
-    modelview.push(glm::mat4(1.0));
-    model.getScenegraph()->getRoot()->accept(raycastRenderer);
-    modelview.pop();
-    
 }
 
 void View::initLights(Model& model) {
@@ -153,13 +151,13 @@ void View::initObjects(Model& model) {
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //if the s-coordinate goes outside (0,1), repeat it
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); //if the t-coordinate goes outside (0,1), repeat it
-	      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureObject->getWidth(),textureObject->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE,textureObject->getImage());
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureObject->getWidth(),textureObject->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE,textureObject->getImage());
         glGenerateMipmap(GL_TEXTURE_2D);
         textureIds[texturePair.first] = textureId;
     }
-    
+
     util::PolygonMesh<VertexAttrib> cameraMesh = model.getCameraMesh();
     cameraObj = new util::ObjectInstance("camera");
     cameraObj->initPolygonMesh(shaderLocations, shaderVarsToVertexAttribs, cameraMesh);
@@ -186,6 +184,16 @@ void View::initShaderVariables() {
 
 
 float View::display(sgraph::IScenegraph *scenegraph, vector<Camera*>& cameras, Camera* activeCamera) {
+
+    if (useRaycast) {
+        modelview.push(glm::mat4(1.0));
+        modelview.top() *= activeCamera->GetViewMatrix();
+        scenegraph->getRoot()->accept(raycastRenderer);
+        raycastRenderer->raytrace(100, 100, modelview);
+        modelview.pop();
+
+        return 0;
+    }
 
     program.enable();
     glClearColor(0,0,0,1);
@@ -255,6 +263,8 @@ float View::display(sgraph::IScenegraph *scenegraph, vector<Camera*>& cameras, C
     
     glfwSwapBuffers(window);
     glfwPollEvents();
+
+
     frames++;
     double currenttime = glfwGetTime();
     deltaTime = currenttime - time;
@@ -264,6 +274,8 @@ float View::display(sgraph::IScenegraph *scenegraph, vector<Camera*>& cameras, C
 }
 
 void View::resize() {
+    if (useRaycast) return;
+
 	  int window_width,window_height;
     glfwGetFramebufferSize(window,&window_width,&window_height);
 
@@ -275,6 +287,7 @@ void View::resize() {
 }
 
 bool View::shouldWindowClose() {
+    if (useRaycast) return false;
     return glfwWindowShouldClose(window);
 }
 
@@ -290,6 +303,10 @@ void View::closeWindow() {
 
     cameraObj->cleanup();
     delete cameraObj;
+
+    if (useRaycast) {
+      delete raycastRenderer;
+    }
 
     glfwDestroyWindow(window);
 

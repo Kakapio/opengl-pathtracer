@@ -16,6 +16,8 @@
 #include <iostream>
 #include <unordered_map>
 #include "../Ray3D.hpp"
+#include <vector>
+#include "../HitRecord.hpp"
 
 using namespace std;
 
@@ -33,9 +35,10 @@ namespace sgraph {
          * @param os the map of ObjectInstance objects
          * @param shaderLocations the shader locations for the program used to render
          */
-        RaycastRenderer(stack<glm::mat4>& mv,map<string,util::ObjectInstance *>& os) 
-            : modelview(mv)
-            , objects(os) {
+        RaycastRenderer(stack<glm::mat4>& mv, map<string,util::ObjectInstance *>& os, string outfileLoc) 
+            : modelview(mv),
+              objects(os),
+              outfileLoc(outfileLoc) {
             for (map<string,util::ObjectInstance *>::iterator it=objects.begin();it!=objects.end();it++) {
                 cout << "Mesh with name: "<< it->first << endl;
             }
@@ -65,9 +68,14 @@ namespace sgraph {
             //send modelview matrix to GPU  
             glm::mat4 normalmatrix = glm::inverse(glm::transpose((modelview.top())));
 
-            string name = leafNode->getInstanceOf();
+            string modelType = leafNode->getInstanceOf();
+            if (modelType != "box" && modelType != "sphere") return;
+
+            string name = leafNode->getName();
+            objTypeMap.emplace(name, modelType);
             modelviewMap.emplace(name, modelview.top());
             normalmatrixMap.emplace(name, normalmatrix);
+            
         }
 
         /**
@@ -122,6 +130,10 @@ namespace sgraph {
 
             return out;
         }
+        
+        void raytrace(int width, int height, stack<glm::mat4>& mv) {
+            
+        }
 
         private:
         stack<glm::mat4>& modelview;    
@@ -129,7 +141,10 @@ namespace sgraph {
         // TODO: map<string,util::TextureImage*> textures;
         unordered_map<string,glm::mat4> modelviewMap;
         unordered_map<string,glm::mat4> normalmatrixMap;
+        unordered_map<string,string> objTypeMap;
 
+        string outfileLoc;
+        vector<vector<HitRecord> > rayHits;
    };
 }
 

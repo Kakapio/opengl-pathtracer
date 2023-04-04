@@ -67,6 +67,7 @@ void Controller::run()
     }
 
     deltaTime = view.display(scenegraph, cameras, cameras[activeCameraIndex]);
+    if (view.useRaycast) break;
   }
   view.closeWindow();
   exit(EXIT_SUCCESS);
