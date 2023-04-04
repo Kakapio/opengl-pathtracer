@@ -100,18 +100,6 @@ void View::init(Callbacks *callbacks, Model& model)
 }
 
 void View::initLights(Model& model) {
-
-    util::Light l1;
-    l1.setAmbient(0,0,0);
-    l1.setDiffuse(0.8f, 0.8f, 0.8f);
-    l1.setSpecular(0.75f, 0.75f, 0.75f);
-    glm::vec3 lpos(100, 200, 300);
-    l1.setPosition(lpos.x, lpos.y, lpos.z);
-    l1.setSpotDirection(-lpos.x, -lpos.y, -lpos.z);
-    l1.setSpotAngle(glm::radians(5.0));
-    lights.push_back(l1);
-    lightCoordinateSystems.push_back("world");
-
   modelview.push(glm::mat4(1.0));
   sgraph::LightAccumulator lightAccum(modelview);
   model.getScenegraph()->getRoot()->accept(&lightAccum);

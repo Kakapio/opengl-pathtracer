@@ -1,6 +1,7 @@
 #ifndef _SCENEGRAPHIMPORTER_H_
 #define _SCENEGRAPHIMPORTER_H_
 
+#include "AbstractSGNode.h"
 #include "IScenegraph.h"
 #include "Scenegraph.h"
 #include "GroupNode.h"
@@ -257,9 +258,9 @@ namespace sgraph {
             string nodename, lightname;
             input >> nodename >> lightname;
 
-            LeafNode *leafNode = dynamic_cast<LeafNode*>(nodes[nodename]);
-            if ((leafNode != NULL) && (lights.find(lightname) != lights.end())) {
-                leafNode->addLight(lights[lightname]);
+            AbstractSGNode *node = dynamic_cast<AbstractSGNode*>(nodes[nodename]);
+            if ((node != NULL) && (lights.find(lightname) != lights.end())) {
+                node->addLight(lights[lightname]);
             }
         }
 
