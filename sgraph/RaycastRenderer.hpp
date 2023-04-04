@@ -15,7 +15,7 @@
 #include <stack>
 #include <iostream>
 #include <unordered_map>
-#include "Ray3D.hpp"
+#include "../Ray3D.hpp"
 
 using namespace std;
 
