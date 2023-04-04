@@ -98,7 +98,10 @@ void View::init(Callbacks *callbacks, Model& model)
 
     renderer = new sgraph::GLScenegraphRenderer(modelview,objects,textureIds,shaderLocations);
     raycastRenderer = new sgraph::RaycastRenderer(modelview,objects);
+
+    modelview.push(glm::mat4(1.0));
     model.getScenegraph()->getRoot()->accept(raycastRenderer);
+    modelview.pop();
     
 }
 
