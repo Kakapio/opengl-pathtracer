@@ -2,6 +2,7 @@
 #define __VIEW_H__
 
 #include "../include/Light.h"
+#include "sgraph/RaycastRenderer.hpp"
 #ifndef GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_NONE
 #endif
@@ -41,6 +42,9 @@ public:
     bool shouldWindowClose();
     void closeWindow();
 
+    bool useRaycast = false;
+
+
 private: 
     void initObjects(Model& model);
     vector<glm::vec4> getLightPositions(const glm::mat4& transformation);
@@ -56,6 +60,7 @@ private:
     glm::mat4 projection;
     stack<glm::mat4> modelview;
     sgraph::SGNodeVisitor *renderer;
+    sgraph::RaycastRenderer *raycastRenderer;
     int frames;
     double time;
     double deltaTime;

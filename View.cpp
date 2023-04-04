@@ -5,6 +5,7 @@
 #include "PolygonMesh.h"
 #include "TextureImage.h"
 #include "sgraph/LightAccumulator.h"
+#include "sgraph/RaycastRenderer.hpp"
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
@@ -96,6 +97,8 @@ void View::init(Callbacks *callbacks, Model& model)
     deltaTime = 0;
 
     renderer = new sgraph::GLScenegraphRenderer(modelview,objects,textureIds,shaderLocations);
+    raycastRenderer = new sgraph::RaycastRenderer(modelview,objects);
+    model.getScenegraph()->getRoot()->accept(raycastRenderer);
     
 }
 

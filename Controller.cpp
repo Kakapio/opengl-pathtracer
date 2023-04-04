@@ -20,6 +20,8 @@ using namespace std;
 Controller::Controller(istream& scenegraphFile, Model& m,View& v): model(m), view(v) {
   initScenegraph(scenegraphFile);
 
+  view.useRaycast = true;
+
   globalCamera = new StationaryCamera(glm::vec3(0.0, 0.0, 20.0));
   globalCamera->LookAt(glm::vec3(0.0,0.0,0.0));
   cameras.push_back(globalCamera);
