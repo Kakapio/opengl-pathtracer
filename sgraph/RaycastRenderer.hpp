@@ -15,6 +15,7 @@
 #include <stack>
 #include <iostream>
 #include <unordered_map>
+#include "Ray3D.hpp"
 
 using namespace std;
 
@@ -107,6 +108,19 @@ namespace sgraph {
 
         void visitRotateTransform(RotateTransform *rotateNode) {
             visitTransformNode(rotateNode);
+        }
+
+        //TODO: Add screen dimension parameters to renderer constructor
+        Ray3D worldToScreenSpace(float width, float height, glm::vec2 pos, float angle) {
+            float halfWidth = width / 2.0f;
+            float halfHeight = height / 2.0f;
+            float aspect = width / height;
+
+            //TODO: use camera position as start?
+            Ray3D out = Ray3D(glm::vec3(0,0,0), glm::vec3(pos.x - halfWidth, pos.y - halfHeight,
+                                                          -1 * (halfHeight / tan(angle))));
+
+            return out;
         }
 
         private:
