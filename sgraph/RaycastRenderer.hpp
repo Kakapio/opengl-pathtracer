@@ -12,6 +12,8 @@
 #include <ShaderProgram.h>
 #include <ShaderLocationsVault.h>
 #include "ObjectInstance.h"
+#include <algorithm>
+#include <cmath>
 #include <stack>
 #include <iostream>
 #include <unordered_map>
@@ -119,20 +121,90 @@ namespace sgraph {
         }
 
         //TODO: Add screen dimension parameters to renderer constructor
-        Ray3D worldToScreenSpace(float width, float height, glm::vec2 pos, float angle) {
+        Ray3D screenSpaceToViewSpace(float width, float height, glm::vec2 pos, float angle) {
             float halfWidth = width / 2.0f;
             float halfHeight = height / 2.0f;
             float aspect = width / height;
 
-            //TODO: use camera position as start?
             Ray3D out = Ray3D(glm::vec3(0,0,0), glm::vec3(pos.x - halfWidth, pos.y - halfHeight,
                                                           -1 * (halfHeight / tan(angle))));
-
             return out;
         }
-        
+
+        void raycastBox(Ray3D& ray, HitRecord& hit, string& name) {
+
+        }
+
+        void raycastSphere(Ray3D& ray, Ray3D& objSpaceRay, HitRecord& hit, string& name) {
+          // Solve quadratic
+          float A = objSpaceRay.direction.x * objSpaceRay.direction.x + objSpaceRay.direction.y * objSpaceRay.direction.y + objSpaceRay.direction.z * objSpaceRay.direction.z;
+          float B = 2.f * (objSpaceRay.direction.x * objSpaceRay.start.x + objSpaceRay.direction.y * objSpaceRay.start.y + objSpaceRay.direction.z * objSpaceRay.start.z);
+          float C = objSpaceRay.start.x * objSpaceRay.start.x + objSpaceRay.start.y * objSpaceRay.start.y + objSpaceRay.start.z * objSpaceRay.start.z - 1.f;
+
+          float root = sqrtf(B * B - 4.f * A * C);
+
+          // no intersection
+          if (root < 0) return;
+
+          float t1 = (-B + root) / (2.f * A);
+          float t2 = (B + root) / (2.f * A);
+
+          float tMin = (t1 >= 0 && t2 >= 0) ? min(t1, t2) : max(t1, t2);
+          // object is fully behind camera
+          if (tMin < 0) return;
+
+          // already hit a closer object
+          if (hit.time <= tMin) return;
+
+          hit.time = tMin;
+          glm::vec4 objSpaceIntersection = objSpaceRay.start + tMin * objSpaceRay.direction;
+          objSpaceIntersection.w = 0.f;
+          hit.intersection = modelviewMap[name] * objSpaceIntersection; //ray.start + tMin * ray.direction;
+          hit.normal = glm::normalize(normalmatrixMap[name] * objSpaceIntersection);
+          // TODO: hit.mat = obj mat
+        }
+
+        void raycast(Ray3D& ray, HitRecord& hit) {
+
+            for(auto& obj : objTypeMap)
+            {
+                string name = obj.first;
+                glm::mat4 mv = modelviewMap[name];
+                glm::mat4 mvInverse = glm::inverse(mv);
+
+                // WARN: Might have to normalize direction vec
+                Ray3D objSpaceRay(mvInverse * ray.start, mvInverse * ray.direction);
+
+                if (obj.second == "box") raycastBox(objSpaceRay, hit, name);
+                else if (obj.second == "sphere") raycastSphere(ray, objSpaceRay, hit, name);
+            }
+        }
+
         void raytrace(int width, int height, stack<glm::mat4>& mv) {
-            
+            rayHits.resize(height);
+            pixelData.resize(height);
+
+            for (int jj = 0; jj < height; ++jj) {
+                vector<HitRecord>& hitsRow = rayHits[jj];
+                hitsRow.resize(width);
+                pixelData[jj].resize(width);
+
+                for (int ii = 0; ii < width; ++ii) {
+                    Ray3D ray = screenSpaceToViewSpace(width, height, glm::vec2(ii,height-jj), glm::radians(60.0));
+
+                    raycast(ray, hitsRow[ii]);
+                }
+            }
+
+            for (int jj = 0; jj < height; ++jj) {
+                for (int ii = 0; ii < width; ++ii) {
+                    if (rayHits[jj][ii].time < MaxFloat) {
+                        pixelData[jj][ii] = glm::vec3(255, 255, 255);
+                    }
+                }
+            }
+
+            // TODO: export to file 'outfileLoc'
         }
 
         private:
@@ -145,6 +217,7 @@ namespace sgraph {
 
         string outfileLoc;
         vector<vector<HitRecord> > rayHits;
+        vector<vector<glm::vec3> > pixelData;
    };
 }
 

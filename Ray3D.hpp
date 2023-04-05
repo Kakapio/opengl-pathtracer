@@ -4,10 +4,10 @@
 #include <glm/glm.hpp>
 
 struct Ray3D {
-  glm::vec3 start;
-  glm::vec3 direction;
+  glm::vec4 start;
+  glm::vec4 direction;
 
-  Ray3D(glm::vec3 start, glm::vec3 direction): start(start), direction(direction) { }
+  Ray3D(glm::vec3 start, glm::vec3 direction): start(start, 1), direction(direction, 0) { }
   Ray3D(const Ray3D &other) : start(other.start), direction(other.direction) { }
 
 private:
