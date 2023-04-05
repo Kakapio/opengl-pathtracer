@@ -20,6 +20,7 @@
 #include "../Ray3D.hpp"
 #include <vector>
 #include "../HitRecord.hpp"
+#include "../PPMImageExporter.h"
 
 using namespace std;
 
@@ -205,6 +206,8 @@ namespace sgraph {
             }
 
             // TODO: export to file 'outfileLoc'
+            PPMImageExporter ppmExporter;
+            ppmExporter.export(outfileLoc, width, height, pixelData);
         }
 
         private:
