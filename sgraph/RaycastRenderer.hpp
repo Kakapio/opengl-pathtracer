@@ -191,7 +191,7 @@ namespace sgraph {
                 pixelData[jj].resize(width);
 
                 for (int ii = 0; ii < width; ++ii) {
-                    Ray3D ray = screenSpaceToViewSpace(width, height, glm::vec2(ii,height-jj), glm::radians(60.0));
+                    Ray3D ray = screenSpaceToViewSpace(width, height, glm::vec2(ii,height-jj), glm::radians(30.0));
 
                     raycast(ray, hitsRow[ii]);
                 }
