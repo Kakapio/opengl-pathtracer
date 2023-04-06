@@ -20,7 +20,7 @@
 #include "../Ray3D.hpp"
 #include <vector>
 #include "../HitRecord.hpp"
-#include "../PPMImageExporter.h"
+#include "glm/ext/quaternion_geometric.hpp"
 
 using namespace std;
 
@@ -132,8 +132,77 @@ namespace sgraph {
             return out;
         }
 
-        void raycastBox(Ray3D& ray, HitRecord& hit, string& name) {
 
+        bool intersectsWidthBoxSide(float& tMin, float& tMax, float start, float dir) {
+          float t1 = (-0.5f - start);
+          float t2 = (0.5f - start);
+          if (dir == 0) {
+            // no intersection
+            if (glm::sign(t1) == glm::sign(t2)) return false;
+
+            tMin = -MaxFloat;
+            tMax = MaxFloat;
+            return true;
+          }
+
+          t1 /= dir;
+          t2 /= dir;
+
+          if (dir < 0) {
+            tMin = min(t1, t2);
+            tMax = max(t1, t2);
+          } else {
+            tMin = t1;
+            tMax = t2;
+          }
+
+          return true;
+        }
+
+        void raycastBox(Ray3D& ray, Ray3D& objSpaceRay, HitRecord& hit, string& name) {
+          float txMin, txMax, tyMin, tyMax, tzMin, tzMax;
+
+          if (!intersectsWidthBoxSide(txMin, txMax, objSpaceRay.start.x, objSpaceRay.direction.x))
+            return;
+
+          if (!intersectsWidthBoxSide(tyMin, tyMax, objSpaceRay.start.y, objSpaceRay.direction.y))
+            return;
+
+          if (!intersectsWidthBoxSide(tzMin, tzMax, objSpaceRay.start.z, objSpaceRay.direction.z))
+            return;
+
+          float tMin = max(max(txMin, tyMin), tzMin);
+          float tMax = min(min(txMax, tyMax), tzMax);
+
+          // no intersection
+          if (tMax < tMin) return;
+
+          float tHit = (tMin >= 0 && tMax >= 0) ? min(tMin, tMax) : max(tMin, tMax);
+          // object is fully behind camera
+          if (tHit < 0) return;
+
+          // already hit a closer object
+          if (hit.time <= tHit) return;
+
+          glm::vec4 objSpaceIntersection = objSpaceRay.start + tHit * objSpaceRay.direction;
+          objSpaceIntersection.w = 0.f;
+
+          glm::vec4 objSpaceNormal;
+          if (objSpaceIntersection.x == 0.5f) objSpaceNormal.x += 1.f;
+          else if (objSpaceIntersection.x == -0.5f) objSpaceNormal.x -= 1.f;
+
+          if (objSpaceIntersection.y == 0.5f) objSpaceNormal.y += 1.f;
+          else if (objSpaceIntersection.y == -0.5f) objSpaceNormal.y -= 1.f;
+
+          if (objSpaceIntersection.z == 0.5f) objSpaceNormal.z += 1.f;
+          else if (objSpaceIntersection.z == -0.5f) objSpaceNormal.z -= 1.f;
+
+          objSpaceNormal = glm::normalize(objSpaceNormal);
+
+          hit.time = tHit;
+          hit.intersection = modelviewMap[name] * objSpaceIntersection; //ray.start + tHit * ray.direction;
+          hit.normal = glm::normalize(normalmatrixMap[name] * objSpaceNormal);
+          // TODO: hit.mat = obj mat
         }
 
         void raycastSphere(Ray3D& ray, Ray3D& objSpaceRay, HitRecord& hit, string& name) {
@@ -176,7 +245,7 @@ namespace sgraph {
                 // WARN: Might have to normalize direction vec
                 Ray3D objSpaceRay(mvInverse * ray.start, mvInverse * ray.direction);
 
-                if (obj.second == "box") raycastBox(objSpaceRay, hit, name);
+                if (obj.second == "box") raycastBox(ray, objSpaceRay, hit, name);
                 else if (obj.second == "sphere") raycastSphere(ray, objSpaceRay, hit, name);
             }
         }
@@ -205,9 +274,26 @@ namespace sgraph {
                 }
             }
 
+
             // TODO: export to file 'outfileLoc'
-            PPMImageExporter ppmExporter;
-            ppmExporter.export(outfileLoc, width, height, pixelData);
+            // PPMImageExporter ppmExporter;
+            // ppmExporter.export(outfileLoc, width, height, pixelData);
+        std::ofstream op(outfileLoc);
+
+        //read in the word P3
+        op << "P3" << "\n";
+        op << width << " " << height << "\n";
+        op << "255\n";
+
+        for (int jj = 0; jj < height; ++jj)
+        {
+            for (int ii = 0; ii < width; ++ii)
+            {
+                op << floorf(pixelData[jj][ii].r) << " ";
+                op << floorf(pixelData[jj][ii].g) << " ";
+                op << floorf(pixelData[jj][ii].b) << std::endl;
+            }
+        }
         }
 
         private:

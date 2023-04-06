@@ -34,15 +34,13 @@ class View
     };
 
 public:
-    View();
+    View(bool useOpenGl = false);
     ~View();
     void init(Callbacks* callbacks, Model& model);
     float display(sgraph::IScenegraph *scenegraph, vector<Camera*>& cameras, Camera* activeCamera);
     void resize();
     bool shouldWindowClose();
     void closeWindow();
-
-    bool useRaycast = false;
 
 
 private: 
@@ -75,6 +73,9 @@ private:
     map<string,unsigned int> textureIds;
     //mipmapping or not
     // bool mipmapped;
+
+    bool useRaycast = false;
+
 };
 
 #endif

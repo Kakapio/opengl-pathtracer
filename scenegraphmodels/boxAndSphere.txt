@@ -1,0 +1,45 @@
+#all the instances
+instance box models/box-outside.obj
+instance sphere models/sphere.obj
+
+#material
+material mat
+emission 0 0 0
+ambient 1 0 0
+diffuse 1 0 0
+specular 1 0 0
+shininess 0
+end-material
+
+light globalLight
+ambient 0.3 0.3 0.3
+diffuse 0.4 0.4 0.4
+specular 0.6 0.6 0.6
+position 30 30 30
+end-light
+
+
+#the root
+group root root
+
+translate bTranslate bTranslate 7.5 0 0
+rotate bRotate bRotate 30 .3 .15 .05
+scale bScale bScale 10 10 10
+leaf b one-box instanceof box
+assign-material b mat
+add-child b bScale
+add-child bScale bRotate
+add-child bRotate bTranslate
+
+translate sTranslate sTranslate -7.5 0 0
+scale sScale sScale 5 5 5
+leaf s one-sphere instanceof sphere
+assign-material s mat
+add-child s sScale
+add-child sScale sTranslate
+
+add-child bTranslate root
+add-child sTranslate root
+assign-light root globalLight
+assign-root root
+

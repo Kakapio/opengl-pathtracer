@@ -1,6 +1,7 @@
 //! [code]
 
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include "View.h"
 #include "Model.h"
@@ -12,15 +13,22 @@ int main(int argc,char *argv[]) {
       exit(EXIT_FAILURE);
     }
 
+    int argi = 1;
+    bool useOpenGl = false;
+    if (!strcmp(argv[argi], "-gl")) {
+      argi++;
+      useOpenGl = true;
+    }
+
     std::ifstream commands;
-    commands.open(argv[1]);
+    commands.open(argv[argi]);
     if (!commands.is_open() && !commands.good()) {
-      printf("unable to open file '%s'\n\tusage: %s <commands-file.txt>\n", argv[1], argv[0]);
+      printf("unable to open file '%s'\n\tusage: %s <commands-file.txt>\n", argv[argi], argv[0]);
       exit(EXIT_FAILURE);
     }
 
     Model model;
-    View view;
+    View view(useOpenGl);
     Controller controller(commands, model,view);
     controller.run();
 

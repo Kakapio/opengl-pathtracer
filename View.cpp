@@ -21,7 +21,7 @@ using namespace std;
 #include "VertexAttrib.h"
 
 
-View::View() {
+View::View(bool useOpenGl) : useRaycast(!useOpenGl) {
 
 }
 
@@ -189,10 +189,10 @@ float View::display(sgraph::IScenegraph *scenegraph, vector<Camera*>& cameras, C
         modelview.push(glm::mat4(1.0));
         modelview.top() *= activeCamera->GetViewMatrix();
         scenegraph->getRoot()->accept(raycastRenderer);
-        raycastRenderer->raytrace(100, 100, modelview);
+        raycastRenderer->raytrace(800, 800, modelview);
         modelview.pop();
 
-        return 0;
+        return -1;
     }
 
     program.enable();
