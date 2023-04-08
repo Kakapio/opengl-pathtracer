@@ -1,6 +1,7 @@
 #ifndef _RAYCASTRENDERER_H_
 #define _RAYCASTRENDERER_H_
 
+#include "Material.h"
 #include "SGNodeVisitor.h"
 #include "GroupNode.h"
 #include "LeafNode.h"
@@ -22,6 +23,9 @@
 #include "../HitRecord.hpp"
 #include "glm/ext/quaternion_geometric.hpp"
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/string_cast.hpp>
+
 using namespace std;
 
 namespace sgraph {
@@ -30,6 +34,30 @@ namespace sgraph {
      * 
      */
     class RaycastRenderer: public SGNodeVisitor {
+        struct RaycastObj {
+            string objType;
+
+            glm::mat4 modelview;
+            glm::mat4 modelviewInverse;
+            glm::mat4 normalMat;
+            
+            util::Material mat;
+
+            RaycastObj(string& type, glm::mat4 mv, util::Material& mat):
+              objType(type),
+              modelview(mv),
+              modelviewInverse(glm::inverse(mv)),
+              normalMat(glm::transpose(glm::inverse(mv))),
+              mat(mat) {
+              cout << objType << endl;
+              cout << glm::to_string(modelview) << endl;
+              cout << glm::to_string(modelviewInverse) << endl;
+              cout << glm::to_string(normalMat) << endl;
+              cout << endl;
+            }
+
+        };
+
         public:
         /**
          * @brief Construct a new RaycastRenderer object
@@ -38,14 +66,9 @@ namespace sgraph {
          * @param os the map of ObjectInstance objects
          * @param shaderLocations the shader locations for the program used to render
          */
-        RaycastRenderer(stack<glm::mat4>& mv, map<string,util::ObjectInstance *>& os, string outfileLoc) 
+        RaycastRenderer(stack<glm::mat4>& mv, string outfileLoc) 
             : modelview(mv),
-              objects(os),
-              outfileLoc(outfileLoc) {
-            for (map<string,util::ObjectInstance *>::iterator it=objects.begin();it!=objects.end();it++) {
-                cout << "Mesh with name: "<< it->first << endl;
-            }
-        }
+              outfileLoc(outfileLoc) { }
 
         /**
          * @brief Recur to the children for drawing
@@ -65,20 +88,13 @@ namespace sgraph {
          * @param leafNode 
          */
         void visitLeafNode(LeafNode *leafNode) {
-            
-            util::Material mat = leafNode->getMaterial();
-            
-            //send modelview matrix to GPU  
-            glm::mat4 normalmatrix = glm::inverse(glm::transpose((modelview.top())));
-
             string modelType = leafNode->getInstanceOf();
             if (modelType != "box" && modelType != "sphere") return;
 
-            string name = leafNode->getName();
-            objTypeMap.emplace(name, modelType);
-            modelviewMap.emplace(name, modelview.top());
-            normalmatrixMap.emplace(name, normalmatrix);
-            
+            glm::mat4 mv = modelview.top();
+            util::Material mat = leafNode->getMaterial();
+
+            objs.emplace_back(modelType, mv, mat);
         }
 
         /**
@@ -88,6 +104,7 @@ namespace sgraph {
          */
         void visitTransformNode(TransformNode * transformNode) {
             modelview.push(modelview.top());
+            glm::mat4 mv = modelview.top();
             modelview.top() = modelview.top() * transformNode->getTransform();
             if (transformNode->getChildren().size()>0) {
                 transformNode->getChildren()[0]->accept(this);
@@ -159,7 +176,7 @@ namespace sgraph {
           return true;
         }
 
-        void raycastBox(Ray3D& ray, Ray3D& objSpaceRay, HitRecord& hit, string& name) {
+        void raycastBox(Ray3D& ray, Ray3D& objSpaceRay, HitRecord& hit, RaycastObj& obj) {
           float txMin, txMax, tyMin, tyMax, tzMin, tzMax;
 
           if (!intersectsWidthBoxSide(txMin, txMax, objSpaceRay.start.x, objSpaceRay.direction.x))
@@ -200,12 +217,12 @@ namespace sgraph {
           objSpaceNormal = glm::normalize(objSpaceNormal);
 
           hit.time = tHit;
-          hit.intersection = modelviewMap[name] * objSpaceIntersection; //ray.start + tHit * ray.direction;
-          hit.normal = glm::normalize(normalmatrixMap[name] * objSpaceNormal);
-          // TODO: hit.mat = obj mat
+          hit.intersection = obj.modelview * objSpaceIntersection; //ray.start + tHit * ray.direction;
+          hit.normal = glm::normalize(obj.normalMat * objSpaceNormal);
+          hit.mat = &obj.mat;
         }
 
-        void raycastSphere(Ray3D& ray, Ray3D& objSpaceRay, HitRecord& hit, string& name) {
+        void raycastSphere(Ray3D& ray, Ray3D& objSpaceRay, HitRecord& hit, RaycastObj& obj) {
           // Solve quadratic
           float A = objSpaceRay.direction.x * objSpaceRay.direction.x + objSpaceRay.direction.y * objSpaceRay.direction.y + objSpaceRay.direction.z * objSpaceRay.direction.z;
           float B = 2.f * (objSpaceRay.direction.x * objSpaceRay.start.x + objSpaceRay.direction.y * objSpaceRay.start.y + objSpaceRay.direction.z * objSpaceRay.start.z);
@@ -229,24 +246,20 @@ namespace sgraph {
           hit.time = tMin;
           glm::vec4 objSpaceIntersection = objSpaceRay.start + tMin * objSpaceRay.direction;
           objSpaceIntersection.w = 0.f;
-          hit.intersection = modelviewMap[name] * objSpaceIntersection; //ray.start + tMin * ray.direction;
-          hit.normal = glm::normalize(normalmatrixMap[name] * objSpaceIntersection);
-          // TODO: hit.mat = obj mat
+          hit.intersection = obj.modelview * objSpaceIntersection; //ray.start + tMin * ray.direction;
+          hit.normal = glm::normalize(obj.normalMat * objSpaceIntersection);
+          hit.mat = &obj.mat;
         }
 
         void raycast(Ray3D& ray, HitRecord& hit) {
 
-            for(auto& obj : objTypeMap)
+            for(auto& obj : objs)
             {
-                string name = obj.first;
-                glm::mat4 mv = modelviewMap[name];
-                glm::mat4 mvInverse = glm::inverse(mv);
-
                 // WARN: Might have to normalize direction vec
-                Ray3D objSpaceRay(mvInverse * ray.start, mvInverse * ray.direction);
+                Ray3D objSpaceRay(obj.modelviewInverse * ray.start, obj.modelviewInverse * ray.direction);
 
-                if (obj.second == "box") raycastBox(ray, objSpaceRay, hit, name);
-                else if (obj.second == "sphere") raycastSphere(ray, objSpaceRay, hit, name);
+                if (obj.objType == "box") raycastBox(ray, objSpaceRay, hit, obj);
+                else if (obj.objType == "sphere") raycastSphere(ray, objSpaceRay, hit, obj);
             }
         }
 
@@ -298,11 +311,9 @@ namespace sgraph {
 
         private:
         stack<glm::mat4>& modelview;    
-        map<string,util::ObjectInstance *> objects;
         // TODO: map<string,util::TextureImage*> textures;
-        unordered_map<string,glm::mat4> modelviewMap;
-        unordered_map<string,glm::mat4> normalmatrixMap;
-        unordered_map<string,string> objTypeMap;
+
+        vector<RaycastObj> objs;
 
         string outfileLoc;
         vector<vector<HitRecord> > rayHits;

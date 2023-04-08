@@ -3,7 +3,7 @@ OBJS=Model.o View.o Controller.o TextRendering.o Camera.o CameraBehaviors.o $(PR
 
 CC=g++
 CXXFLAGS=-std=c++17 -O0 -fno-inline -g
-LDFLAGS=-std=c++17 -lglad -lglfw3
+LDFLAGS=-std=c++17 -g -lglad -lglfw3
 INCLUDES = -I../include
 LIBS = -L../lib
 

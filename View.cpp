@@ -97,7 +97,7 @@ void View::init(Callbacks *callbacks, Model& model)
     deltaTime = 0;
 
     if (useRaycast)
-      raycastRenderer = new sgraph::RaycastRenderer(modelview,objects,"render.ppm");
+      raycastRenderer = new sgraph::RaycastRenderer(modelview,"render.ppm");
     else 
       renderer = new sgraph::GLScenegraphRenderer(modelview,objects,textureIds,shaderLocations);
 
