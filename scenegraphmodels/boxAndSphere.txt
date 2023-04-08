@@ -23,14 +23,13 @@ end-light
 group root root
 
 translate bTranslate bTranslate 7.5 0 0
-# rotate bRotate bRotate 30 .3 .15 .05
-# scale bScale bScale 10 10 10
+rotate bRotate bRotate 30 .3 .15 .05
+scale bScale bScale 10 10 10
 leaf b one-box instanceof box
 assign-material b mat
-add-child b bTranslate
-#add-child bScale bRotate
-#add-child bRotate bTranslate
-#add-child bScale bTranslate
+add-child b bScale
+add-child bScale bRotate
+add-child bRotate bTranslate
 
 translate sTranslate sTranslate -7.5 0 0
 scale sScale sScale 5 5 5

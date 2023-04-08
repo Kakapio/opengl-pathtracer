@@ -49,11 +49,13 @@ namespace sgraph {
               modelviewInverse(glm::inverse(mv)),
               normalMat(glm::transpose(glm::inverse(mv))),
               mat(mat) {
+              /*
               cout << objType << endl;
               cout << glm::to_string(modelview) << endl;
               cout << glm::to_string(modelviewInverse) << endl;
               cout << glm::to_string(normalMat) << endl;
               cout << endl;
+              */
             }
 
         };
@@ -228,10 +230,11 @@ namespace sgraph {
           float B = 2.f * (objSpaceRay.direction.x * objSpaceRay.start.x + objSpaceRay.direction.y * objSpaceRay.start.y + objSpaceRay.direction.z * objSpaceRay.start.z);
           float C = objSpaceRay.start.x * objSpaceRay.start.x + objSpaceRay.start.y * objSpaceRay.start.y + objSpaceRay.start.z * objSpaceRay.start.z - 1.f;
 
-          float root = sqrtf(B * B - 4.f * A * C);
-
+          float radical = B * B - 4.f * A * C;
           // no intersection
-          if (root < 0) return;
+          if (radical < 0) return;
+
+          float root = sqrtf(radical);
 
           float t1 = (-B + root) / (2.f * A);
           float t2 = (B + root) / (2.f * A);
