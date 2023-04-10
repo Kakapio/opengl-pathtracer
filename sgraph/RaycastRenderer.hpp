@@ -1,6 +1,7 @@
 #ifndef _RAYCASTRENDERER_H_
 #define _RAYCASTRENDERER_H_
 
+#include "Light.h"
 #include "Material.h"
 #include "SGNodeVisitor.h"
 #include "GroupNode.h"
@@ -22,6 +23,7 @@
 #include <vector>
 #include "../HitRecord.hpp"
 #include "glm/ext/quaternion_geometric.hpp"
+#include "glm/geometric.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
@@ -68,9 +70,17 @@ namespace sgraph {
          * @param os the map of ObjectInstance objects
          * @param shaderLocations the shader locations for the program used to render
          */
-        RaycastRenderer(stack<glm::mat4>& mv, string outfileLoc) 
+        RaycastRenderer(stack<glm::mat4>& mv, vector<util::Light>& lights, string outfileLoc) 
             : modelview(mv),
-              outfileLoc(outfileLoc) { }
+              lights(lights),
+              outfileLoc(outfileLoc) {
+          for (auto& light : this->lights) {
+            light.setPosition(modelview.top() * light.getPosition());
+            glm::vec4 spotDir = glm::normalize(modelview.top() * light.getSpotDirection());
+            light.setSpotDirection(spotDir.x, spotDir.y, spotDir.z);
+            light.setSpotAngle(cosf(light.getSpotCutoff()));
+          }
+        }
 
         /**
          * @brief Recur to the children for drawing
@@ -266,6 +276,56 @@ namespace sgraph {
             }
         }
 
+        inline static glm::vec3 compMul(const glm::vec3& lhs, const glm::vec3& rhs) {
+          return glm::vec3(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z);
+        }
+
+        glm::vec3 shade(HitRecord& hit) {
+            glm::vec3& fPosition = hit.intersection;
+            glm::vec3& fNormal = hit.normal;
+            glm::vec3 fColor(0,0,0);
+            glm::vec3 lightVec(0,0,0), viewVec(0,0,0), reflectVec(0,0,0);
+            glm::vec3 normalView(0,0,0);
+            glm::vec3 ambient(0,0,0), diffuse(0,0,0), specular(0,0,0);
+            float nDotL,rDotV;
+
+            for (auto& light : lights)
+            {
+              if (light.getPosition().w!=0)
+                lightVec = glm::normalize(glm::vec3(light.getPosition()) - fPosition);
+              else
+                lightVec = glm::normalize(-glm::vec3(light.getPosition()));
+
+              /*
+              glm::vec3 spotDir = light.getSpotDirection();
+              if (glm::length(spotDir) > 0 && -glm::dot(spotDir,lightVec) < light.getSpotCutoff())
+              {
+                continue;
+              }
+              */
+
+              glm::vec3 tNormal = fNormal;
+              normalView = glm::normalize(tNormal);
+              nDotL = glm::dot(normalView,lightVec);
+
+              viewVec = -fPosition;
+              viewVec = glm::normalize(viewVec);
+
+              reflectVec = glm::reflect(-lightVec,normalView);
+              reflectVec = glm::normalize(reflectVec);
+
+              rDotV = max(glm::dot(reflectVec,viewVec),0.0f);
+
+              ambient = compMul(hit.mat->getAmbient(), light.getAmbient());
+              diffuse = compMul(hit.mat->getDiffuse(), light.getDiffuse()) * max(nDotL,0.f);
+              if (nDotL>0)
+                specular = compMul(hit.mat->getSpecular(), light.getSpecular()) * pow(rDotV,max(hit.mat->getShininess(), 1.f));
+              fColor = fColor + ambient + diffuse + specular;
+            }
+
+            return fColor;
+        }
+
         void raytrace(int width, int height, stack<glm::mat4>& mv) {
             rayHits.resize(height);
             pixelData.resize(height);
@@ -284,8 +344,9 @@ namespace sgraph {
 
             for (int jj = 0; jj < height; ++jj) {
                 for (int ii = 0; ii < width; ++ii) {
-                    if (rayHits[jj][ii].time < MaxFloat) {
-                        pixelData[jj][ii] = glm::vec3(255, 255, 255);
+                    HitRecord& hit = rayHits[jj][ii];
+                    if (hit.time < MaxFloat) {
+                        pixelData[jj][ii] = shade(hit) * 255.f;
                     }
                 }
             }
@@ -313,7 +374,8 @@ namespace sgraph {
         }
 
         private:
-        stack<glm::mat4>& modelview;    
+        stack<glm::mat4>& modelview;   
+        vector<util::Light> lights;
         // TODO: map<string,util::TextureImage*> textures;
 
         vector<RaycastObj> objs;

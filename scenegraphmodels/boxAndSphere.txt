@@ -3,12 +3,18 @@ instance box models/box-outside.obj
 instance sphere models/sphere.obj
 
 #material
-material mat
-emission 0 0 0
+material bMat
 ambient 1 0 0
 diffuse 1 0 0
 specular 1 0 0
 shininess 0
+end-material
+
+material sMat
+ambient .3 0 .5
+diffuse .3 0 1
+specular .4 .2 .6
+shininess 50
 end-material
 
 light globalLight
@@ -26,7 +32,7 @@ translate bTranslate bTranslate 7.5 0 0
 rotate bRotate bRotate 30 .3 .15 .05
 scale bScale bScale 10 10 10
 leaf b one-box instanceof box
-assign-material b mat
+assign-material b bMat
 add-child b bScale
 add-child bScale bRotate
 add-child bRotate bTranslate
@@ -34,7 +40,7 @@ add-child bRotate bTranslate
 translate sTranslate sTranslate -7.5 0 0
 scale sScale sScale 5 5 5
 leaf s one-sphere instanceof sphere
-assign-material s mat
+assign-material s sMat
 add-child s sScale
 add-child sScale sTranslate
 

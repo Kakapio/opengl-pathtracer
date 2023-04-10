@@ -20,7 +20,7 @@ using namespace std;
 Controller::Controller(istream& scenegraphFile, Model& m,View& v): model(m), view(v) {
   initScenegraph(scenegraphFile);
 
-  globalCamera = new StationaryCamera(glm::vec3(50.0, 75.0, 100.0));
+  globalCamera = new StationaryCamera(glm::vec3(0.0, 0.0, 30.0));
   globalCamera->LookAt(glm::vec3(0.0,0.0,0.0));
   cameras.push_back(globalCamera);
 

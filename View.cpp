@@ -96,9 +96,7 @@ void View::init(Callbacks *callbacks, Model& model)
     time = glfwGetTime();
     deltaTime = 0;
 
-    if (useRaycast)
-      raycastRenderer = new sgraph::RaycastRenderer(modelview,"render.ppm");
-    else 
+    if (!useRaycast)
       renderer = new sgraph::GLScenegraphRenderer(modelview,objects,textureIds,shaderLocations);
 
 }
@@ -188,6 +186,7 @@ float View::display(sgraph::IScenegraph *scenegraph, vector<Camera*>& cameras, C
     if (useRaycast) {
         modelview.push(glm::mat4(1.0));
         modelview.top() *= activeCamera->GetViewMatrix();
+        raycastRenderer = new sgraph::RaycastRenderer(modelview,lights,"render.ppm");
         scenegraph->getRoot()->accept(raycastRenderer);
         raycastRenderer->raytrace(800, 800, modelview);
         modelview.pop();
