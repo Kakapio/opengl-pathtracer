@@ -7,13 +7,13 @@ emission 0 0 0
 ambient 1 0 0
 diffuse 0 1 0
 specular 0 0 1
-shininess 0
+shininess 50
 end-material
 
 light globalLight
 ambient 0.1 0.1 0.1
-diffuse 0.5 0.5 0.5
-specular 1 1 1
+diffuse 0.35 0.35 0.35
+specular .6 .6 .6
 position 2 2 2
 end-light
 

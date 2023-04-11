@@ -27,6 +27,7 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
 
 using namespace std;
 
@@ -49,15 +50,13 @@ namespace sgraph {
               objType(type),
               modelview(mv),
               modelviewInverse(glm::inverse(mv)),
-              normalMat(glm::transpose(glm::inverse(mv))),
+              normalMat(glm::inverseTranspose(mv)),
               mat(mat) {
-              /*
               cout << objType << endl;
               cout << glm::to_string(modelview) << endl;
               cout << glm::to_string(modelviewInverse) << endl;
               cout << glm::to_string(normalMat) << endl;
               cout << endl;
-              */
             }
 
         };
@@ -75,7 +74,9 @@ namespace sgraph {
               lights(lights),
               outfileLoc(outfileLoc) {
           for (auto& light : this->lights) {
-            light.setPosition(modelview.top() * light.getPosition());
+            glm::vec4 lightPosition = light.getPosition();
+            // lightPosition.z = -lightPosition.z;
+            light.setPosition(modelview.top() * lightPosition);
             glm::vec4 spotDir = glm::normalize(modelview.top() * light.getSpotDirection());
             light.setSpotDirection(spotDir.x, spotDir.y, spotDir.z);
             light.setSpotAngle(cosf(light.getSpotCutoff()));
@@ -157,7 +158,7 @@ namespace sgraph {
             float aspect = width / height;
 
             Ray3D out = Ray3D(glm::vec3(0,0,0), glm::vec3(pos.x - halfWidth, pos.y - halfHeight,
-                                                          -1 * (halfHeight / tan(angle))));
+                                                          -(halfHeight / tan(angle))));
             return out;
         }
 
@@ -216,7 +217,7 @@ namespace sgraph {
           glm::vec4 objSpaceIntersection = objSpaceRay.start + tHit * objSpaceRay.direction;
           objSpaceIntersection.w = 0.f;
 
-          glm::vec4 objSpaceNormal;
+          glm::vec4 objSpaceNormal(0.f,0.f,0.f,0.f);
           if (objSpaceIntersection.x == 0.5f) objSpaceNormal.x += 1.f;
           else if (objSpaceIntersection.x == -0.5f) objSpaceNormal.x -= 1.f;
 
@@ -258,9 +259,11 @@ namespace sgraph {
 
           hit.time = tMin;
           glm::vec4 objSpaceIntersection = objSpaceRay.start + tMin * objSpaceRay.direction;
-          objSpaceIntersection.w = 0.f;
           hit.intersection = obj.modelview * objSpaceIntersection; //ray.start + tMin * ray.direction;
-          hit.normal = glm::normalize(obj.normalMat * objSpaceIntersection);
+          glm::vec3 objSpaceNormal(objSpaceIntersection);
+          glm::vec4 normalDir = obj.normalMat * glm::vec4(objSpaceNormal, 0);
+          glm::vec3 normal(normalDir);
+          hit.normal = glm::normalize(normal);
           hit.mat = &obj.mat;
         }
 
@@ -283,10 +286,10 @@ namespace sgraph {
         glm::vec3 shade(HitRecord& hit) {
             glm::vec3& fPosition = hit.intersection;
             glm::vec3& fNormal = hit.normal;
-            glm::vec3 fColor(0,0,0);
-            glm::vec3 lightVec(0,0,0), viewVec(0,0,0), reflectVec(0,0,0);
-            glm::vec3 normalView(0,0,0);
-            glm::vec3 ambient(0,0,0), diffuse(0,0,0), specular(0,0,0);
+            glm::vec3 fColor(0.f,0.f,0.f);
+            glm::vec3 lightVec(0.f,0.f,0.f), viewVec(0.f,0.f,0.f), reflectVec(0.f,0.f,0.f);
+            glm::vec3 normalView(0.f,0.f,0.f);
+            glm::vec3 ambient(0.f,0.f,0.f), diffuse(0.f,0.f,0.f), specular(0.f,0.f,0.f);
             float nDotL,rDotV;
 
             for (auto& light : lights)
@@ -311,10 +314,11 @@ namespace sgraph {
               viewVec = -fPosition;
               viewVec = glm::normalize(viewVec);
 
-              reflectVec = glm::reflect(-lightVec,normalView);
+              reflectVec = glm::reflect(lightVec,normalView);
               reflectVec = glm::normalize(reflectVec);
 
-              rDotV = max(glm::dot(reflectVec,viewVec),0.0f);
+              rDotV = glm::dot(reflectVec,viewVec);
+              rDotV = max(rDotV,0.0f);
 
               ambient = compMul(hit.mat->getAmbient(), light.getAmbient());
               diffuse = compMul(hit.mat->getDiffuse(), light.getDiffuse()) * max(nDotL,0.f);
