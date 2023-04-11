@@ -318,7 +318,7 @@ namespace sgraph {
               viewVec = -fPosition;
               viewVec = glm::normalize(viewVec);
 
-              reflectVec = glm::reflect(lightVec,normalView);
+              reflectVec = glm::reflect(-lightVec,normalView);
               reflectVec = glm::normalize(reflectVec);
 
               rDotV = glm::dot(reflectVec,viewVec);
