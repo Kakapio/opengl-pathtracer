@@ -219,7 +219,7 @@ namespace sgraph {
           if (hit.time <= tHit) return;
 
           glm::vec4 objSpaceIntersection = objSpaceRay.start + tHit * objSpaceRay.direction;
-          objSpaceIntersection.w = 0.f;
+          objSpaceIntersection.w = 1.f;
 
           glm::vec4 objSpaceNormal(0.f,0.f,0.f,0.f);
           if (objSpaceIntersection.x > 0.4998f) objSpaceNormal.x += 1.f;
