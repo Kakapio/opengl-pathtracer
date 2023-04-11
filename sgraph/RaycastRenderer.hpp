@@ -303,13 +303,11 @@ namespace sgraph {
               else
                 lightVec = glm::normalize(-glm::vec3(light.getPosition()));
 
-              /*
               glm::vec3 spotDir = light.getSpotDirection();
               if (glm::length(spotDir) > 0 && -glm::dot(spotDir,lightVec) < light.getSpotCutoff())
               {
                 continue;
               }
-              */
 
               glm::vec3 tNormal = fNormal;
               normalView = glm::normalize(tNormal);

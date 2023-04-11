@@ -21,9 +21,17 @@ light globalLight
 ambient 0.3 0.3 0.3
 diffuse 0.4 0.4 0.4
 specular 0.6 0.6 0.6
-position 30 30 -30
+position 30 30 30
 end-light
 
+light spotLight
+ambient 0.3 0.3 0.3
+diffuse 0.4 0.4 0.4
+specular 0.6 0.6 0.6
+position 0 0 20
+spotcutoff 0.5
+direction 0 0 -1
+end-light
 
 #the root
 group root root
@@ -47,5 +55,6 @@ add-child sScale sTranslate
 add-child bTranslate root
 add-child sTranslate root
 assign-light root globalLight
+assign-light root spotLight
 assign-root root
 
