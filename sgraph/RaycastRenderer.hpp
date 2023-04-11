@@ -218,14 +218,17 @@ namespace sgraph {
           objSpaceIntersection.w = 0.f;
 
           glm::vec4 objSpaceNormal(0.f,0.f,0.f,0.f);
-          if (objSpaceIntersection.x == 0.5f) objSpaceNormal.x += 1.f;
-          else if (objSpaceIntersection.x == -0.5f) objSpaceNormal.x -= 1.f;
+          if (objSpaceIntersection.x > 0.4998f) objSpaceNormal.x += 1.f;
+          else if (objSpaceIntersection.x < -0.4998f) objSpaceNormal.x -= 1.f;
 
-          if (objSpaceIntersection.y == 0.5f) objSpaceNormal.y += 1.f;
-          else if (objSpaceIntersection.y == -0.5f) objSpaceNormal.y -= 1.f;
+          if (objSpaceIntersection.y > 0.4998f) objSpaceNormal.y += 1.f;
+          else if (objSpaceIntersection.y < -0.4998f) objSpaceNormal.y -= 1.f;
 
-          if (objSpaceIntersection.z == 0.5f) objSpaceNormal.z += 1.f;
-          else if (objSpaceIntersection.z == -0.5f) objSpaceNormal.z -= 1.f;
+          if (objSpaceIntersection.z > 0.4998f) objSpaceNormal.z += 1.f;
+          else if (objSpaceIntersection.z < -0.4998f) objSpaceNormal.z -= 1.f;
+
+          if (glm::length(objSpaceNormal) == 0)
+            cout << glm::to_string(objSpaceIntersection) << endl;
 
           objSpaceNormal = glm::normalize(objSpaceNormal);
 

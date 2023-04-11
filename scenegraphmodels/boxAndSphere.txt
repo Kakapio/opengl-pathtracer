@@ -5,15 +5,15 @@ instance sphere models/sphere.obj
 #material
 material bMat
 ambient 1 0 0
-diffuse 1 0 0
-specular 1 0 0
-shininess 0
+diffuse 0 1 0
+specular 0 0 1
+shininess 1
 end-material
 
 material sMat
-ambient .3 0 .5
-diffuse .3 0 1
-specular .4 .2 .6
+ambient 1 0 0
+diffuse 0 1 0
+specular 0 0 1
 shininess 50
 end-material
 
