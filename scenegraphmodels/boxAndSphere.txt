@@ -21,7 +21,7 @@ light globalLight
 ambient 0.3 0.3 0.3
 diffuse 0.4 0.4 0.4
 specular 0.6 0.6 0.6
-position 30 30 30
+position 30 30 -30
 end-light
 
 

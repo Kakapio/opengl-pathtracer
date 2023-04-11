@@ -226,6 +226,7 @@ float View::display(sgraph::IScenegraph *scenegraph, vector<Camera*>& cameras, C
         }
         */
         pos = lightTransformation * pos;
+        // cout << glm::to_string(pos) << endl;
         glUniform4fv(lightLocations[i].position, 1, glm::value_ptr(pos));
         spotDir = lightTransformation * spotDir;
         glUniform3fv(lightLocations[i].spotDirection, 1, glm::value_ptr(glm::normalize(spotDir)));

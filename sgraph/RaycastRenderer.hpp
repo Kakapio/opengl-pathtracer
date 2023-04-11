@@ -52,11 +52,13 @@ namespace sgraph {
               modelviewInverse(glm::inverse(mv)),
               normalMat(glm::inverseTranspose(mv)),
               mat(mat) {
+              /*
               cout << objType << endl;
               cout << glm::to_string(modelview) << endl;
               cout << glm::to_string(modelviewInverse) << endl;
               cout << glm::to_string(normalMat) << endl;
               cout << endl;
+              */
             }
 
         };
@@ -76,7 +78,9 @@ namespace sgraph {
           for (auto& light : this->lights) {
             glm::vec4 lightPosition = light.getPosition();
             // lightPosition.z = -lightPosition.z;
-            light.setPosition(modelview.top() * lightPosition);
+            lightPosition = modelview.top() * lightPosition;
+            // cout << glm::to_string(lightPosition) << endl;
+            light.setPosition(lightPosition);
             glm::vec4 spotDir = glm::normalize(modelview.top() * light.getSpotDirection());
             light.setSpotDirection(spotDir.x, spotDir.y, spotDir.z);
             light.setSpotAngle(cosf(light.getSpotCutoff()));
@@ -227,9 +231,6 @@ namespace sgraph {
           if (objSpaceIntersection.z > 0.4998f) objSpaceNormal.z += 1.f;
           else if (objSpaceIntersection.z < -0.4998f) objSpaceNormal.z -= 1.f;
 
-          if (glm::length(objSpaceNormal) == 0)
-            cout << glm::to_string(objSpaceIntersection) << endl;
-
           objSpaceNormal = glm::normalize(objSpaceNormal);
 
           hit.time = tHit;
@@ -250,8 +251,8 @@ namespace sgraph {
 
           float root = sqrtf(radical);
 
-          float t1 = (-B + root) / (2.f * A);
-          float t2 = (B + root) / (2.f * A);
+          float t1 = (-B - root) / (2.f * A);
+          float t2 = (-B + root) / (2.f * A);
 
           float tMin = (t1 >= 0 && t2 >= 0) ? min(t1, t2) : max(t1, t2);
           // object is fully behind camera
@@ -373,9 +374,9 @@ namespace sgraph {
         {
             for (int ii = 0; ii < width; ++ii)
             {
-                op << floorf(pixelData[jj][ii].r) << " ";
-                op << floorf(pixelData[jj][ii].g) << " ";
-                op << floorf(pixelData[jj][ii].b) << std::endl;
+                op << min(255, (int)floorf(pixelData[jj][ii].r)) << " ";
+                op << min(255, (int)floorf(pixelData[jj][ii].g)) << " ";
+                op << min(255, (int)floorf(pixelData[jj][ii].b)) << std::endl;
             }
         }
         }
