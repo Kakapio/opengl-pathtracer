@@ -41,6 +41,7 @@ public:
     void resize();
     bool shouldWindowClose();
     void closeWindow();
+    void output_raytrace(sgraph::IScenegraph *scenegraph, Camera* activeCamera);
 
 
 private: 

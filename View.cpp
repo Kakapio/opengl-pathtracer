@@ -313,7 +313,13 @@ void View::closeWindow() {
     glfwTerminate();
 }
 
-
-
-
-
+void View::output_raytrace(sgraph::IScenegraph *scenegraph, Camera *activeCamera) {
+    cout << "Attempting to output raytrace." << endl;
+    modelview.push(glm::mat4(1.0));
+    modelview.top() *= activeCamera->GetViewMatrix();
+    raycastRenderer = new sgraph::RaycastRenderer(modelview,lights,"render.ppm");
+    scenegraph->getRoot()->accept(raycastRenderer);
+    raycastRenderer->raytrace(800, 800, modelview);
+    modelview.pop();
+    cout << "Generated raytrace output." << endl;
+}
