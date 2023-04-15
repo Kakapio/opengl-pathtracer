@@ -55,6 +55,7 @@ private:
     util::ShaderProgram program;
     util::ShaderLocationsVault shaderLocations;
     map<string,util::ObjectInstance *> objects;
+    map<string,util::TextureImage *> textures;
     util::ObjectInstance* cameraObj;
     glm::mat4 projection;
     stack<glm::mat4> modelview;

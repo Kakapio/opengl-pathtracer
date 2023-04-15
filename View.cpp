@@ -133,7 +133,7 @@ void View::initObjects(Model& model) {
 
     //textures
 
-    map<string,util::TextureImage *> textures = model.getScenegraph()->getTextures();
+    textures = model.getScenegraph()->getTextures();
     
     PPMImageLoader ppmLoader;
     ImageLoader *imgLoader = &ppmLoader;
@@ -186,7 +186,7 @@ float View::display(sgraph::IScenegraph *scenegraph, vector<Camera*>& cameras, C
     if (useRaycast) {
         modelview.push(glm::mat4(1.0));
         modelview.top() *= activeCamera->GetViewMatrix();
-        raycastRenderer = new sgraph::RaycastRenderer(modelview,lights,"output_render.ppm");
+        raycastRenderer = new sgraph::RaycastRenderer(textures, modelview,lights,"output_render.ppm");
         scenegraph->getRoot()->accept(raycastRenderer);
         raycastRenderer->raytrace(800, 800, modelview);
         modelview.pop();
@@ -317,7 +317,7 @@ void View::output_raytrace(sgraph::IScenegraph *scenegraph, Camera *activeCamera
     cout << "Attempting to output raytrace." << endl;
     modelview.push(glm::mat4(1.0));
     modelview.top() *= activeCamera->GetViewMatrix();
-    raycastRenderer = new sgraph::RaycastRenderer(modelview,lights,"output_render.ppm");
+    raycastRenderer = new sgraph::RaycastRenderer(textures, modelview,lights,"output_render.ppm");
     scenegraph->getRoot()->accept(raycastRenderer);
     raycastRenderer->raytrace(800, 800, modelview);
     modelview.pop();

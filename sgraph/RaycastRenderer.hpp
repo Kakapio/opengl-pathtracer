@@ -6,6 +6,7 @@
 #include "SGNodeVisitor.h"
 #include "GroupNode.h"
 #include "LeafNode.h"
+#include "TextureImage.h"
 #include "TransformNode.h"
 #include "RotateTransform.h"
 #include "ScaleTransform.h"
@@ -45,13 +46,15 @@ namespace sgraph {
             glm::mat4 normalMat;
             
             util::Material mat;
+            util::TextureImage* texture;
 
-            RaycastObj(string& type, glm::mat4 mv, util::Material& mat):
+            RaycastObj(string& type, glm::mat4 mv, util::Material& mat, util::TextureImage* texture):
               objType(type),
               modelview(mv),
               modelviewInverse(glm::inverse(mv)),
               normalMat(glm::inverseTranspose(mv)),
-              mat(mat) {
+              mat(mat),
+              texture(texture) {
               /*
               cout << objType << endl;
               cout << glm::to_string(modelview) << endl;
@@ -71,8 +74,9 @@ namespace sgraph {
          * @param os the map of ObjectInstance objects
          * @param shaderLocations the shader locations for the program used to render
          */
-        RaycastRenderer(stack<glm::mat4>& mv, vector<util::Light>& lights, string outfileLoc) 
-            : modelview(mv),
+        RaycastRenderer(map<string,util::TextureImage*>& textures, stack<glm::mat4>& mv, vector<util::Light>& lights, string outfileLoc) 
+            : textures(textures),
+              modelview(mv),
               lights(lights),
               outfileLoc(outfileLoc) {
           for (auto& light : this->lights) {
@@ -110,8 +114,9 @@ namespace sgraph {
 
             glm::mat4 mv = modelview.top();
             util::Material mat = leafNode->getMaterial();
+            util::TextureImage* texture = textures[leafNode->getTextureName()];
 
-            objs.emplace_back(modelType, mv, mat);
+            objs.emplace_back(modelType, mv, mat, texture);
         }
 
         /**
@@ -237,6 +242,7 @@ namespace sgraph {
           hit.intersection = obj.modelview * objSpaceIntersection; //ray.start + tHit * ray.direction;
           hit.normal = glm::normalize(obj.normalMat * objSpaceNormal);
           hit.mat = &obj.mat;
+          hit.texture = obj.texture;
         }
 
         void raycastSphere(Ray3D& ray, Ray3D& objSpaceRay, HitRecord& hit, RaycastObj& obj) {
@@ -269,6 +275,7 @@ namespace sgraph {
           glm::vec3 normal(normalDir);
           hit.normal = glm::normalize(normal);
           hit.mat = &obj.mat;
+          hit.texture = obj.texture;
         }
 
         void raycast(Ray3D& ray, HitRecord& hit) {
@@ -399,6 +406,7 @@ namespace sgraph {
         }
 
         private:
+        map<string,util::TextureImage *>& textures;
         stack<glm::mat4>& modelview;   
         vector<util::Light> lights;
         // TODO: map<string,util::TextureImage*> textures;
