@@ -82,7 +82,7 @@ void main()
             specular = vec3(0,0,0);
         fColor = fColor + vec4(ambient+diffuse+specular,1.0);
     }
-    //fColor = fColor * texture(image,fTexCoord.st);
-    fColor = texture(image,fTexCoord.st);
+    fColor = fColor * texture(image,fTexCoord.st);
+    //fColor = texture(image,fTexCoord.st);
     //fColor = vec4(fTexCoord.s,fTexCoord.t,0,1);
 }

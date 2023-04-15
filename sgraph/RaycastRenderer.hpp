@@ -366,11 +366,11 @@ namespace sgraph {
               fColor = fColor + ambient + diffuse + specular;
             }
 
+            glm::vec3 texColor = glm::vec3(hit.texture->getColor(hit.texCoord.s, hit.texCoord.t)) / 255.f;
 
-            //fColor = fColor * texture(image,fTexCoord.st);
-            fColor = hit.texture->getColor(hit.texCoord.s, hit.texCoord.t);
+            fColor = compMul(fColor, texColor);
+            //fColor = texColor;
             //fColor = glm::vec4(hit.texCoord.s,hit.texCoord.t,0,1);
-
 
             return fColor;
         }
@@ -394,8 +394,6 @@ namespace sgraph {
             for (int jj = 0; jj < height; ++jj) {
                 for (int ii = 0; ii < width; ++ii) {
                     HitRecord& hit = rayHits[jj][ii];
-                    if (ii == 444 && jj == 258)
-                      cout << "here\n";
                     if (hit.time < MaxFloat) {
                         pixelData[jj][ii] = shade(hit) * 255.f;
                     }
