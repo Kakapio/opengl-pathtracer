@@ -36,8 +36,8 @@ light spotLight
 diffuse 0.5 0 0
 specular 0.8 0 0
 position 0 0 20
-spotcutoff 0.5
-direction 0 0 -1
+#spotcutoff 0.5
+#direction 0 0 -1
 end-light
 
 #the root
