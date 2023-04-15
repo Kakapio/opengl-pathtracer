@@ -334,7 +334,7 @@ namespace sgraph {
 
               ambient = compMul(hit.mat->getAmbient(), light.getAmbient());
               // Object cannot directly see the light
-              if (shadowcastHit.time >= 1.f) {
+              if (shadowcastHit.time >= 1.f || shadowcastHit < 0) {
                 diffuse = compMul(hit.mat->getDiffuse(), light.getDiffuse()) * max(nDotL,0.f);
                 if (nDotL>0)
                   specular = compMul(hit.mat->getSpecular(), light.getSpecular()) * pow(rDotV,max(hit.mat->getShininess(), 1.f));

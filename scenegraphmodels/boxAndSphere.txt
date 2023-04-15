@@ -5,36 +5,36 @@ instance sphere models/sphere.obj
 #material
 material bgMat
 ambient .1 .1 .1
-diffuse .3 .3 .3
-specular 1 1 1
+diffuse .4 .4 .4
+specular .6 .6 .6
 shininess 100
 end-material
 
 material bMat
 ambient 1 0 0
-diffuse 0 1 0
-specular 0 0 1
+diffuse 1 0 0
+specular 1 .8 .8
 shininess 1
 end-material
 
 material sMat
-ambient 1 0 0
-diffuse 0 1 0
-specular 0 0 1
+ambient .4 0 .2
+diffuse .6 0 .5
+specular 1 .7 .9
 shininess 50
 end-material
 
 light globalLight
-ambient 0.3 0.3 0.3
+ambient 0.2 0.2 0.2
 diffuse 0.4 0.4 0.4
-specular 0.6 0.6 0.6
+specular 0.7 0.7 0.7
 position 30 30 30
 end-light
 
 light spotLight
-ambient 0.3 0.3 0.3
-diffuse 0.4 0.4 0.4
-specular 0.6 0.6 0.6
+#ambient 0.3 0 0
+diffuse 0.5 0 0
+specular 0.8 0 0
 position 0 0 20
 spotcutoff 0.5
 direction 0 0 -1
