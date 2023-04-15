@@ -73,3 +73,5 @@ assign-light root globalLight
 assign-light root spotLight
 assign-root root
 
+texture tex-globe textures/earthmap.ppm
+assign-texture s tex-globe

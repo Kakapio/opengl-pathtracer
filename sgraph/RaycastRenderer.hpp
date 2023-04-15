@@ -25,6 +25,7 @@
 #include "../HitRecord.hpp"
 #include "glm/ext/quaternion_geometric.hpp"
 #include "glm/geometric.hpp"
+#include "glm/gtx/wrap.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
@@ -276,6 +277,18 @@ namespace sgraph {
           hit.normal = glm::normalize(normal);
           hit.mat = &obj.mat;
           hit.texture = obj.texture;
+
+          float phi = asinf(objSpaceIntersection.y);
+          float theta = atan2f(objSpaceIntersection.z, objSpaceIntersection.x);
+
+          // Gives us 270 instead of -90. No negative angles.
+          theta = -theta;
+          if (theta < 0.0f) {
+              theta += glm::radians(360.0f);
+          }
+
+          hit.texCoord = glm::vec2(theta / glm::radians(360.0f),
+                                   phi / glm::radians(180.0f) + 0.5f);
         }
 
         void raycast(Ray3D& ray, HitRecord& hit) {
@@ -352,6 +365,12 @@ namespace sgraph {
               }
               fColor = fColor + ambient + diffuse + specular;
             }
+
+
+            //fColor = fColor * texture(image,fTexCoord.st);
+            fColor = hit.texture->getColor(hit.texCoord.s, hit.texCoord.t);
+            //fColor = glm::vec4(hit.texCoord.s,hit.texCoord.t,0,1);
+
 
             return fColor;
         }
