@@ -299,9 +299,17 @@ namespace sgraph {
             for (auto& light : lights)
             {
               if (light.getPosition().w!=0)
-                lightVec = glm::normalize(glm::vec3(light.getPosition()) - fPosition);
+                lightVec = glm::vec3(light.getPosition()) - fPosition;
               else
-                lightVec = glm::normalize(-glm::vec3(light.getPosition()));
+                lightVec = -glm::vec3(light.getPosition());
+
+              Ray3D rayToLight(fPosition, lightVec);
+              rayToLight.start += 0.01f * rayToLight.direction;
+              HitRecord hitBeforeLight;
+
+              raycast(rayToLight, hitBeforeLight);
+
+              lightVec = glm::normalize(lightVec);
 
               glm::vec3 spotDir = light.getSpotDirection();
               if (glm::length(spotDir) > 0 && -glm::dot(spotDir,lightVec) < light.getSpotCutoff())
@@ -323,9 +331,12 @@ namespace sgraph {
               rDotV = max(rDotV,0.0f);
 
               ambient = compMul(hit.mat->getAmbient(), light.getAmbient());
-              diffuse = compMul(hit.mat->getDiffuse(), light.getDiffuse()) * max(nDotL,0.f);
-              if (nDotL>0)
-                specular = compMul(hit.mat->getSpecular(), light.getSpecular()) * pow(rDotV,max(hit.mat->getShininess(), 1.f));
+              // Object cannot directly see the light
+              if (hit.time >= 1.f) {
+                diffuse = compMul(hit.mat->getDiffuse(), light.getDiffuse()) * max(nDotL,0.f);
+                if (nDotL>0)
+                  specular = compMul(hit.mat->getSpecular(), light.getSpecular()) * pow(rDotV,max(hit.mat->getShininess(), 1.f));
+              }
               fColor = fColor + ambient + diffuse + specular;
             }
 

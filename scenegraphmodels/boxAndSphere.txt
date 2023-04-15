@@ -3,6 +3,13 @@ instance box models/box-outside.obj
 instance sphere models/sphere.obj
 
 #material
+material bgMat
+ambient .1 .1 .1
+diffuse .3 .3 .3
+specular 1 1 1
+shininess 100
+end-material
+
 material bMat
 ambient 1 0 0
 diffuse 0 1 0
@@ -36,6 +43,13 @@ end-light
 #the root
 group root root
 
+translate bgTranslate bgTranslate 0 0 -10
+scale bgScale bgScale 45 45 1
+leaf bg background instanceof box
+assign-material bg bgMat
+add-child bg bgScale
+add-child bgScale bgTranslate
+
 translate bTranslate bTranslate 7.5 0 0
 rotate bRotate bRotate 30 .3 .15 .05
 scale bScale bScale 10 10 10
@@ -52,6 +66,7 @@ assign-material s sMat
 add-child s sScale
 add-child sScale sTranslate
 
+add-child bgTranslate root
 add-child bTranslate root
 add-child sTranslate root
 assign-light root globalLight
