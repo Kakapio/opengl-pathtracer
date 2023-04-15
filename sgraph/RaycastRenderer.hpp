@@ -303,11 +303,13 @@ namespace sgraph {
               else
                 lightVec = -glm::vec3(light.getPosition());
 
+              // Shoot ray towards light source, any hit means shadow.
               Ray3D rayToLight(fPosition, lightVec);
-              rayToLight.start += 0.01f * rayToLight.direction;
-              HitRecord hitBeforeLight;
+              // Need 'skin' width to avoid hitting itself.
+              rayToLight.start += 0.001f * rayToLight.direction;
+              HitRecord shadowcastHit;
 
-              raycast(rayToLight, hitBeforeLight);
+              raycast(rayToLight, shadowcastHit);
 
               lightVec = glm::normalize(lightVec);
 
@@ -332,7 +334,7 @@ namespace sgraph {
 
               ambient = compMul(hit.mat->getAmbient(), light.getAmbient());
               // Object cannot directly see the light
-              if (hit.time >= 1.f) {
+              if (shadowcastHit.time >= 1.f) {
                 diffuse = compMul(hit.mat->getDiffuse(), light.getDiffuse()) * max(nDotL,0.f);
                 if (nDotL>0)
                   specular = compMul(hit.mat->getSpecular(), light.getSpecular()) * pow(rDotV,max(hit.mat->getShininess(), 1.f));
