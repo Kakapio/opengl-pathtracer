@@ -396,10 +396,21 @@ namespace sgraph {
             float t2 = (-B + root) / (2.f * A);
 
             float tcMin = min(t1, t2), tcMax = max(t1, t2);
-            
-            if (tcMin < tyMin && tcMax < tyMin) return;
+            float tMin, tMax;
 
-            float tMin = max(tyMin, tcMin), tMax = min(tyMax, tcMax);
+            if (tcMin < 0) {
+              if (tcMax < tyMin || tcMax > tyMax) return;
+              tMin = tcMax;
+              tMax = tyMax;
+            } else {
+              if (tcMax < tyMin) return;
+              if (tyMax < tcMin) return;
+
+              tMin = max(tyMin, tcMin);
+              tMax = min(tyMax, tcMax);
+
+              if (tMin == tyMin && tMax == tyMax) return;
+            }
             //float tMin = tcMin, tMax = tcMax;
             // no intersection
             if (tMax < tMin) return;
