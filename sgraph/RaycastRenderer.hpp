@@ -110,7 +110,8 @@ namespace sgraph {
          */
         void visitLeafNode(LeafNode *leafNode) {
             string modelType = leafNode->getInstanceOf();
-            if (modelType != "box" && modelType != "sphere") return;
+            if (modelType != "box" && modelType != "sphere"
+            && modelType != "cylinder" && modelType != "cone") return;
 
             glm::mat4 mv = modelview.top();
             util::Material mat = leafNode->getMaterial();
@@ -245,7 +246,7 @@ namespace sgraph {
           hit.texture = obj.texture;
         }
 
-        void raycastSphere(Ray3D& ray, Ray3D& objSpaceRay, HitRecord& hit, RaycastObj& obj) {
+        void raycastSphere(Ray3D &objSpaceRay, HitRecord &hit, RaycastObj &obj) {
           // Solve quadratic
           float A = objSpaceRay.direction.x * objSpaceRay.direction.x + objSpaceRay.direction.y * objSpaceRay.direction.y + objSpaceRay.direction.z * objSpaceRay.direction.z;
           float B = 2.f * (objSpaceRay.direction.x * objSpaceRay.start.x + objSpaceRay.direction.y * objSpaceRay.start.y + objSpaceRay.direction.z * objSpaceRay.start.z);
@@ -290,6 +291,37 @@ namespace sgraph {
                                    phi / glm::radians(180.0f) + 0.5f);
         }
 
+        void raycastCylinder(Ray3D& ray, Ray3D& objSpaceRay, HitRecord& hit, RaycastObj& obj) {
+            float A = objSpaceRay.direction.x * objSpaceRay.direction.x
+                    + objSpaceRay.direction.z * objSpaceRay.direction.z;
+            float B = 2 * objSpaceRay.start.x * objSpaceRay.direction.x
+                    + 2 * objSpaceRay.start.z * objSpaceRay.direction.z;
+            float C = objSpaceRay.start.x * objSpaceRay.start.x
+                    + objSpaceRay.start.z * objSpaceRay.start.z - 1.f;
+
+            float radical = B * B - 4.f * A * C;
+            // no intersection
+            if (radical < 0) return;
+
+            float root = sqrtf(radical);
+
+            float t1 = (-B - root) / (2.f * A);
+            float t2 = (-B + root) / (2.f * A);
+
+            float tMin = (t1 >= 0 && t2 >= 0) ? min(t1, t2) : max(t1, t2);
+            // object is fully behind camera
+            if (tMin < 0) return;
+
+            // already hit a closer object
+            if (hit.time <= tMin) return;
+
+            hit.time = tMin;
+        }
+
+        void raycastCone(Ray3D& ray, Ray3D& objSpaceRay, HitRecord& hit, RaycastObj& obj) {
+
+        }
+
         void raycast(Ray3D& ray, HitRecord& hit) {
 
             for(auto& obj : objs)
@@ -298,7 +330,9 @@ namespace sgraph {
                 Ray3D objSpaceRay(obj.modelviewInverse * ray.start, obj.modelviewInverse * ray.direction);
 
                 if (obj.objType == "box") raycastBox(ray, objSpaceRay, hit, obj);
-                else if (obj.objType == "sphere") raycastSphere(ray, objSpaceRay, hit, obj);
+                else if (obj.objType == "sphere") raycastSphere(objSpaceRay, hit, obj);
+                else if (obj.objType == "cylinder") raycastCylinder(ray, objSpaceRay, hit, obj);
+                else if (obj.objType == "cone") raycastCone(ray, objSpaceRay, hit, obj);
             }
         }
 
@@ -394,7 +428,7 @@ namespace sgraph {
                 for (int ii = 0; ii < width; ++ii) {
                     HitRecord& hit = rayHits[jj][ii];
                     if (hit.time < MaxFloat) {
-                        pixelData[jj][ii] = shade(hit) * 255.f;
+                        pixelData[jj][ii] = glm::vec3(255.0f, 255.0f, 255.0f);//shade(hit) * 255.f;
                     }
                 }
             }
