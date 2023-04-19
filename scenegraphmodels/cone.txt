@@ -1,0 +1,30 @@
+#all the instances
+instance cone models/cone.obj
+
+#material
+material mat-node-3-0
+emission 0 0 0
+ambient 1 0 0
+diffuse 0 1 0
+specular 0 0 1
+shininess 50
+end-material
+
+light globalLight
+ambient 0.1 0.1 0.1
+diffuse 0.35 0.35 0.35
+specular .6 .6 .6
+position 2 2 2
+end-light
+
+
+#the root
+group node-1-0 root
+scale node-2-0 scale 5 5 5
+leaf node-3-0 one-sphere instanceof cone #comment here?
+assign-light node-3-0 globalLight
+
+assign-material node-3-0 mat-node-3-0
+add-child node-3-0 node-2-0
+add-child node-2-0 node-1-0
+assign-root node-1-0

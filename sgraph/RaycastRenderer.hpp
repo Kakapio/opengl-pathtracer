@@ -341,7 +341,7 @@ namespace sgraph {
             float tcMin = min(t1, t2), tcMax = max(t1, t2);
 
             float tMin = max(tyMin, tcMin), tMax = min(tyMax, tcMax);
-            
+            // no intersection
             if (tMax < tMin) return;
             
             float tHit = (tMin >= 0 && tMax >= 0) ? min(tMin, tMax) : max(tMin, tMax);
@@ -356,18 +356,48 @@ namespace sgraph {
         }
 
         void raycastCone(Ray3D& ray, Ray3D& objSpaceRay, HitRecord& hit, RaycastObj& obj) {
+            float tyMin, tyMax;
+            if (!intersectsCylinderCaps(tyMin, tyMax, objSpaceRay.start.y, objSpaceRay.direction.y))
+              return;
+
             float A = objSpaceRay.direction.x * objSpaceRay.direction.x
                     + objSpaceRay.direction.z * objSpaceRay.direction.z
                     - objSpaceRay.direction.y * objSpaceRay.direction.y;
-            //TODO: might need values other than 1 for base and height.
 
-            float B = 2 * objSpaceRay.start.x * objSpaceRay.direction.x
-                      + 2 * objSpaceRay.start.z * objSpaceRay.direction.z
-                      - (objSpaceRay.direction.y * (objSpaceRay.start.y + 1));
+            float B = 2.f * objSpaceRay.start.x * objSpaceRay.direction.x
+                      + 2.f * objSpaceRay.start.z * objSpaceRay.direction.z
+                      - 2.f * (objSpaceRay.direction.y * (objSpaceRay.start.y - 1.f));
 
             float C = objSpaceRay.start.x * objSpaceRay.start.x
                       + objSpaceRay.start.z * objSpaceRay.start.z
-                      - (objSpaceRay.start.y * (objSpaceRay.start.y + 2));
+                      - (objSpaceRay.start.y * (objSpaceRay.start.y + 2.f) + 1.f);
+
+            float radical = B * B - 4.f * A * C;
+            // no intersection
+            if (radical < 0) return;
+
+            float root = sqrtf(radical);
+
+            float t1 = (-B - root) / (2.f * A);
+            float t2 = (-B + root) / (2.f * A);
+
+            float tcMin = min(t1, t2), tcMax = max(t1, t2);
+            
+            // if (tcMin < tyMin && tcMax < tyMin) return;
+
+            float tMin = max(tyMin, tcMin), tMax = min(tyMax, tcMax);
+            // no intersection
+            if (tMax < tMin) return;
+            
+            float tHit = (tMin >= 0 && tMax >= 0) ? min(tMin, tMax) : max(tMin, tMax);
+
+            // object is fully behind camera
+            if (tHit < 0) return;
+
+            // already hit a closer object
+            if (hit.time <= tHit) return;
+
+            hit.time = tHit;
         }
 
         void raycast(Ray3D& ray, HitRecord& hit) {
