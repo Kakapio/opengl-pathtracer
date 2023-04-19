@@ -353,6 +353,32 @@ namespace sgraph {
             if (hit.time <= tHit) return;
 
             hit.time = tHit;
+            glm::vec4 objSpaceIntersection = objSpaceRay.start + tMin * objSpaceRay.direction;
+            hit.intersection = obj.modelview * objSpaceIntersection;
+            
+            glm::vec3 normal;
+            if (objSpaceIntersection.y < 0.001f) normal = glm::vec3(0.f, -1.f, 0.f);
+            else if (objSpaceIntersection.y > 0.999f) normal = glm::vec3(0.f, 1.f, 0.f);
+            else {
+              glm::vec3 objSpaceNormal(objSpaceIntersection);
+              objSpaceNormal.y = 0;
+              normal = obj.normalMat * glm::vec4(objSpaceNormal, 0);
+            }
+            hit.normal = glm::normalize(normal);
+            hit.mat = &obj.mat;
+            hit.texture = obj.texture;
+
+            float phi = asinf(objSpaceIntersection.y);
+            float theta = atan2f(objSpaceIntersection.z, objSpaceIntersection.x);
+
+            // Gives us 270 instead of -90. No negative angles.
+            theta = -theta;
+            if (theta < 0.0f) {
+              theta += glm::radians(360.0f);
+            }
+
+            hit.texCoord = glm::vec2(theta / glm::radians(360.0f),
+                phi / glm::radians(180.0f) + 0.5f);
         }
 
         void raycastCone(Ray3D& ray, Ray3D& objSpaceRay, HitRecord& hit, RaycastObj& obj) {
@@ -361,19 +387,7 @@ namespace sgraph {
               return;
 
             float yStart = objSpaceRay.start.y - 1;
-            /*
-            float A = objSpaceRay.direction.x * objSpaceRay.direction.x
-                    + objSpaceRay.direction.z * objSpaceRay.direction.z
-                    - objSpaceRay.direction.y * objSpaceRay.direction.y;
 
-            float B = 2.f * objSpaceRay.start.x * objSpaceRay.direction.x
-                      + 2.f * objSpaceRay.start.z * objSpaceRay.direction.z
-                      - 2.f * (objSpaceRay.direction.y * (objSpaceRay.start.y - 1.f));
-
-            float C = objSpaceRay.start.x * objSpaceRay.start.x
-                      + objSpaceRay.start.z * objSpaceRay.start.z
-                      - (objSpaceRay.start.y * (objSpaceRay.start.y + 2.f) + 1.f);
-                      */
             float A = objSpaceRay.direction.x * objSpaceRay.direction.x
                     + objSpaceRay.direction.z * objSpaceRay.direction.z
                     - objSpaceRay.direction.y * objSpaceRay.direction.y;
@@ -497,8 +511,8 @@ namespace sgraph {
                   specular = compMul(hit.mat->getSpecular(), light.getSpecular()) * pow(rDotV,max(hit.mat->getShininess(), 1.f));
               }
               else {
-                ambient = {0., 0., 0.};
                 diffuse = {0., 0., 0.};
+                specular = {0., 0., 0.};
               }
               fColor = fColor + ambient + diffuse + specular;
             }
@@ -532,7 +546,8 @@ namespace sgraph {
                 for (int ii = 0; ii < width; ++ii) {
                     HitRecord& hit = rayHits[jj][ii];
                     if (hit.time < MaxFloat) {
-                        pixelData[jj][ii] = glm::vec3(255.0f, 255.0f, 255.0f);//shade(hit) * 255.f;
+                        pixelData[jj][ii] = shade(hit) * 255.f;
+                        // glm::vec3(255.0f, 255.0f, 255.0f);
                     }
                 }
             }
