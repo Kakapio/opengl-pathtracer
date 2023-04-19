@@ -200,11 +200,11 @@ namespace sgraph {
 
         bool intersectsCylinderCaps(float& tMin, float& tMax, float start, float dir) {
             float t1 = -start;
-            float t2 = (0.5f - start);
+            float t2 = (1.f - start);
 
             if (dir == 0) {
                 // no intersection
-                if (glm::sign(t1) == glm::sign(t2)) return false;
+                if (start < 0 || start > 1.f) return false;
 
                 tMin = -MaxFloat;
                 tMax = MaxFloat;
@@ -318,6 +318,10 @@ namespace sgraph {
         }
 
         void raycastCylinder(Ray3D& ray, Ray3D& objSpaceRay, HitRecord& hit, RaycastObj& obj) {
+            float tyMin, tyMax;
+            if (!intersectsCylinderCaps(tyMin, tyMax, objSpaceRay.start.y, objSpaceRay.direction.y))
+              return;
+            
             float A = objSpaceRay.direction.x * objSpaceRay.direction.x
                     + objSpaceRay.direction.z * objSpaceRay.direction.z;
             float B = 2 * objSpaceRay.start.x * objSpaceRay.direction.x
@@ -334,14 +338,21 @@ namespace sgraph {
             float t1 = (-B - root) / (2.f * A);
             float t2 = (-B + root) / (2.f * A);
 
-            float tMin = (t1 >= 0 && t2 >= 0) ? min(t1, t2) : max(t1, t2);
+            float tcMin = min(t1, t2), tcMax = max(t1, t2);
+
+            float tMin = max(tyMin, tcMin), tMax = min(tyMax, tcMax);
+            
+            if (tMax < tMin) return;
+            
+            float tHit = (tMin >= 0 && tMax >= 0) ? min(tMin, tMax) : max(tMin, tMax);
+
             // object is fully behind camera
-            if (tMin < 0) return;
+            if (tHit < 0) return;
 
             // already hit a closer object
-            if (hit.time <= tMin) return;
+            if (hit.time <= tHit) return;
 
-            hit.time = tMin;
+            hit.time = tHit;
         }
 
         void raycastCone(Ray3D& ray, Ray3D& objSpaceRay, HitRecord& hit, RaycastObj& obj) {
