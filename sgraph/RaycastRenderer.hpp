@@ -360,6 +360,8 @@ namespace sgraph {
             if (!intersectsCylinderCaps(tyMin, tyMax, objSpaceRay.start.y, objSpaceRay.direction.y))
               return;
 
+            float yStart = objSpaceRay.start.y - 1;
+            /*
             float A = objSpaceRay.direction.x * objSpaceRay.direction.x
                     + objSpaceRay.direction.z * objSpaceRay.direction.z
                     - objSpaceRay.direction.y * objSpaceRay.direction.y;
@@ -371,6 +373,18 @@ namespace sgraph {
             float C = objSpaceRay.start.x * objSpaceRay.start.x
                       + objSpaceRay.start.z * objSpaceRay.start.z
                       - (objSpaceRay.start.y * (objSpaceRay.start.y + 2.f) + 1.f);
+                      */
+            float A = objSpaceRay.direction.x * objSpaceRay.direction.x
+                    + objSpaceRay.direction.z * objSpaceRay.direction.z
+                    - objSpaceRay.direction.y * objSpaceRay.direction.y;
+
+            float B = 2.f * objSpaceRay.start.x * objSpaceRay.direction.x
+                      + 2.f * objSpaceRay.start.z * objSpaceRay.direction.z
+                      - 2.f * objSpaceRay.direction.y * yStart;
+
+            float C = objSpaceRay.start.x * objSpaceRay.start.x
+                      + objSpaceRay.start.z * objSpaceRay.start.z
+                      - yStart * yStart;
 
             float radical = B * B - 4.f * A * C;
             // no intersection
@@ -383,9 +397,10 @@ namespace sgraph {
 
             float tcMin = min(t1, t2), tcMax = max(t1, t2);
             
-            // if (tcMin < tyMin && tcMax < tyMin) return;
+            if (tcMin < tyMin && tcMax < tyMin) return;
 
             float tMin = max(tyMin, tcMin), tMax = min(tyMax, tcMax);
+            //float tMin = tcMin, tMax = tcMax;
             // no intersection
             if (tMax < tMin) return;
             
