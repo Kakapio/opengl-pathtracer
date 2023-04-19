@@ -172,7 +172,6 @@ namespace sgraph {
             return out;
         }
 
-
         bool intersectsWidthBoxSide(float& tMin, float& tMax, float start, float dir) {
           float t1 = (-0.5f - start);
           float t2 = (0.5f - start);
@@ -197,6 +196,33 @@ namespace sgraph {
           }
 
           return true;
+        }
+
+        bool intersectsCylinderCaps(float& tMin, float& tMax, float start, float dir) {
+            float t1 = -start;
+            float t2 = (0.5f - start);
+
+            if (dir == 0) {
+                // no intersection
+                if (glm::sign(t1) == glm::sign(t2)) return false;
+
+                tMin = -MaxFloat;
+                tMax = MaxFloat;
+                return true;
+            }
+
+            t1 /= dir;
+            t2 /= dir;
+
+            if (dir < 0) {
+                tMin = min(t1, t2);
+                tMax = max(t1, t2);
+            } else {
+                tMin = t1;
+                tMax = t2;
+            }
+
+            return true;
         }
 
         void raycastBox(Ray3D& ray, Ray3D& objSpaceRay, HitRecord& hit, RaycastObj& obj) {
@@ -319,7 +345,18 @@ namespace sgraph {
         }
 
         void raycastCone(Ray3D& ray, Ray3D& objSpaceRay, HitRecord& hit, RaycastObj& obj) {
+            float A = objSpaceRay.direction.x * objSpaceRay.direction.x
+                    + objSpaceRay.direction.z * objSpaceRay.direction.z
+                    - objSpaceRay.direction.y * objSpaceRay.direction.y;
+            //TODO: might need values other than 1 for base and height.
 
+            float B = 2 * objSpaceRay.start.x * objSpaceRay.direction.x
+                      + 2 * objSpaceRay.start.z * objSpaceRay.direction.z
+                      - (objSpaceRay.direction.y * (objSpaceRay.start.y + 1));
+
+            float C = objSpaceRay.start.x * objSpaceRay.start.x
+                      + objSpaceRay.start.z * objSpaceRay.start.z
+                      - (objSpaceRay.start.y * (objSpaceRay.start.y + 2));
         }
 
         void raycast(Ray3D& ray, HitRecord& hit) {
