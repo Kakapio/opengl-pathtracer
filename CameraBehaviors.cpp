@@ -3,9 +3,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 StationaryCamera::StationaryCamera(glm::vec3 position) {
   pos = position;
 }
@@ -30,8 +27,8 @@ HelicopterCamera::HelicopterCamera(float height, float radius, float speed, floa
 
 void HelicopterCamera::Update(float deltaTime) {
   currentAngle += deltaTime * speed;
-  if (currentAngle > M_PI * 2.0) {
-    currentAngle -= M_PI * 2.0;
+  if (currentAngle > glm::radians(360.f)) {
+    currentAngle -= glm::radians(360.f);
   }
 
   pos.x = sinf(currentAngle) * radius;
@@ -56,7 +53,7 @@ void FirstPersonCamera::Update(float deltaTime) {
     glm::vec3 axisAndDirection = (input & (int)Input::LookUp) ? -RIGHT : RIGHT;
 
     eulerAngles += rotationSpeed * deltaTime * axisAndDirection;
-    eulerAngles.x = glm::clamp(eulerAngles.x, (float)M_PI * 0.501f, (float)M_PI * 1.499f);
+    eulerAngles.x = glm::clamp(eulerAngles.x, glm::radians(90.f), glm::radians(270.f));
   }
 
   if ((input & (int)Input::LookLeft) != (input & (int)Input::LookRight)) {
