@@ -42,3 +42,14 @@ add-child t-building root
 rotate r-building r-building 14 0 1 0
 add-child r-building t-building
 add-child build r-building
+
+light lamp2
+ambient 0.3 0.3 0.3
+diffuse 0.3 0.3 0.3
+specular 0.3 0.3 0.3
+position 100 100 100
+direction 0 0 0
+spotcutoff 0
+end-light
+
+assign-light root lamp2 

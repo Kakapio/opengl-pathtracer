@@ -418,6 +418,7 @@ namespace sgraph {
 
             if (tcMin < 0) {
               if (tcMax < tyMin || tcMax > tyMax) return;
+              if (tcMax < 0 && tyMin < 0 && tyMax > 0) return;
               tMin = tcMax;
               tMax = tyMax;
             } else {
@@ -429,7 +430,6 @@ namespace sgraph {
 
               if (tMin == tyMin && tMax == tyMax) return;
             }
-            //float tMin = tcMin, tMax = tcMax;
             // no intersection
             if (tMax < tMin) return;
             
@@ -506,7 +506,7 @@ namespace sgraph {
               // Shoot ray towards light source, any hit means shadow.
               Ray3D rayToLight(fPosition, lightVec);
               // Need 'skin' width to avoid hitting itself.
-              rayToLight.start += 0.1f * glm::normalize(rayToLight.direction);
+              rayToLight.start += glm::vec4(0.1f * glm::normalize(glm::vec3(rayToLight.direction)), 0);
               HitRecord shadowcastHit;
 
               raycast(rayToLight, shadowcastHit);
