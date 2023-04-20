@@ -18,14 +18,10 @@ shininess 1
 end-material
 
 material sMat
-ambient 0.1804 0.7137 0.8588
-diffuse 0.1804 0.7137 0.8588
-specular 0.1804 0.7137 0.8588
-absorption 0.5
-reflection 0.5
-transparency 0
+ambient .4 0 .2
+diffuse .6 0 .5
+specular 1 .7 .9
 shininess 50
-
 end-material
 
 light globalLight
@@ -76,3 +72,6 @@ add-child sTranslate root
 assign-light root globalLight
 assign-light root spotLight
 assign-root root
+
+texture tex-globe textures/earthmap.ppm
+assign-texture s tex-globe
