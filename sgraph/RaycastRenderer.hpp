@@ -536,10 +536,12 @@ namespace sgraph {
 
             if (maxBounces > 0 && hit.mat->getAbsorption() <= 0.999f) {
               Ray3D reflectionRay(fPosition, hit.reflection);
+              reflectionRay.start += glm::normalize(reflectionRay.direction) * 0.001f;
               HitRecord reflectionHit;
               raycast(reflectionRay, reflectionHit);
 
-              reflectColor = shade(reflectionHit, maxBounces - 1);
+              if (reflectionHit.time < MaxFloat)
+                reflectColor = shade(reflectionHit, maxBounces - 1);
 
               fColor = absorbColor * hit.mat->getAbsorption()
                        + reflectColor * hit.mat->getReflection()
