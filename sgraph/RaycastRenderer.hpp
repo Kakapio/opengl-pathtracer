@@ -369,6 +369,7 @@ namespace sgraph {
             hit.normal = glm::normalize(normal);
             hit.mat = &obj.mat;
             hit.texture = obj.texture;
+            /*
 
             float phi = asinf(objSpaceIntersection.y);
             float theta = atan2f(objSpaceIntersection.z, objSpaceIntersection.x);
@@ -381,6 +382,7 @@ namespace sgraph {
 
             hit.texCoord = glm::vec2(theta / glm::radians(360.0f),
                 phi / glm::radians(180.0f) + 0.5f);
+                */
         }
 
         void raycastCone(Ray3D& ray, Ray3D& objSpaceRay, HitRecord& hit, RaycastObj& obj) {
@@ -440,6 +442,22 @@ namespace sgraph {
             if (hit.time <= tHit) return;
 
             hit.time = tHit;
+            glm::vec4 objSpaceIntersection = objSpaceRay.start + tMin * objSpaceRay.direction;
+            hit.intersection = obj.modelview * objSpaceIntersection;
+
+            glm::vec3 normal;
+            if (objSpaceIntersection.y < 0.001f) normal = glm::vec3(0.f, -1.f, 0.f);
+            else {
+              glm::vec3 objSpaceNormal(objSpaceIntersection);
+              objSpaceNormal.y = 0;
+              normal = glm::normalize(objSpaceNormal);
+              
+              normal.y = sqrtf(normal.x * normal.x + normal.z * normal.z);
+            }
+            normal = obj.normalMat * glm::vec4(normal, 0);
+            hit.normal = glm::normalize(normal);
+            hit.mat = &obj.mat;
+            hit.texture = obj.texture;
         }
 
         void raycast(Ray3D& ray, HitRecord& hit) {
@@ -488,7 +506,7 @@ namespace sgraph {
               // Shoot ray towards light source, any hit means shadow.
               Ray3D rayToLight(fPosition, lightVec);
               // Need 'skin' width to avoid hitting itself.
-              rayToLight.start += 0.001f * glm::normalize(rayToLight.direction);
+              rayToLight.start += 0.1f * glm::normalize(rayToLight.direction);
               HitRecord shadowcastHit;
 
               raycast(rayToLight, shadowcastHit);
@@ -575,6 +593,9 @@ namespace sgraph {
                 for (int ii = 0; ii < width; ++ii) {
                     HitRecord& hit = rayHits[jj][ii];
                     if (hit.time < MaxFloat) {
+                        if (jj == 350 && ii == 400) {
+                          pixelData[jj][ii] = shade(hit, 10) * 255.f;
+                        }
                         pixelData[jj][ii] = shade(hit, 10) * 255.f;
                         // glm::vec3(255.0f, 255.0f, 255.0f);
                         // pixelData[jj][ii] = showNormals(hit);
