@@ -157,22 +157,46 @@ namespace sgraph {
                 if (command == "ambient") {
                     input >> r >> g >> b;
                     mat.setAmbient(r, g, b);
-                } else if (command == "diffuse") {
+                }
+                else if (command == "diffuse") {
                     input >> r >> g >> b;
                     mat.setDiffuse(r, g, b);
-                } else if (command == "specular") {
+                }
+                else if (command == "specular") {
                     input >> r >> g >> b;
                     mat.setSpecular(r, g, b);
-                } else if (command == "emission") {
+                }
+                else if (command == "emission") {
                     input >> r >> g >> b;
                     mat.setEmission(r, g, b);
-                } else if (command == "shininess") {
+                }
+                else if (command == "shininess") {
                     input >> r;
                     if (r >= 1) mat.setShininess(r);
+                }
+                else if (command == "absorption")
+                {
+                    input >> r;
+                    mat.setAbsorption(r);
+                }
+                else if (command == "reflection")
+                {
+                    input >> r;
+                    mat.setReflection(r);
+                }
+                else if (command == "transparency")
+                {
+                    input >> r;
+                    mat.setTransparency(r);
                 }
                 input >> command;
             }
             materials[name] = mat;
+
+            // Check that all our values equal 1.
+            float totalVals = mat.getAbsorption() + mat.getReflection() + mat.getTransparency();
+            if (totalVals < 0.999f || totalVals > 1.001f)
+                throw std::invalid_argument("Invalid values for reflective properties.");
         }
 
         virtual void parseLight(istream &input) {

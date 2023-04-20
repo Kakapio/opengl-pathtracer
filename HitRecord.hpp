@@ -13,6 +13,7 @@ struct HitRecord {
     float time = MaxFloat;
     glm::vec3 intersection;
     glm::vec3 normal;
+    glm::vec3 reflection;
     util::Material* mat = NULL;
     glm::vec2 texCoord;
     util::TextureImage* texture = NULL;
