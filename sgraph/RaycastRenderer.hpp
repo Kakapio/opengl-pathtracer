@@ -362,8 +362,9 @@ namespace sgraph {
             else {
               glm::vec3 objSpaceNormal(objSpaceIntersection);
               objSpaceNormal.y = 0;
-              normal = obj.normalMat * glm::vec4(objSpaceNormal, 0);
+              normal = objSpaceNormal;
             }
+            normal = obj.normalMat * glm::vec4(normal, 0);
             hit.normal = glm::normalize(normal);
             hit.mat = &obj.mat;
             hit.texture = obj.texture;
@@ -458,6 +459,10 @@ namespace sgraph {
           return glm::vec3(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z);
         }
 
+        glm::vec3 showNormals(HitRecord& hit) {
+            return (hit.normal + glm::vec3(1., 1., 1.)) * 0.5f * 255.f;
+        }
+
         glm::vec3 shade(HitRecord& hit) {
             glm::vec3& fPosition = hit.intersection;
             glm::vec3& fNormal = hit.normal;
@@ -548,6 +553,7 @@ namespace sgraph {
                     if (hit.time < MaxFloat) {
                         pixelData[jj][ii] = shade(hit) * 255.f;
                         // glm::vec3(255.0f, 255.0f, 255.0f);
+                        // pixelData[jj][ii] = showNormals(hit);
                     }
                 }
             }

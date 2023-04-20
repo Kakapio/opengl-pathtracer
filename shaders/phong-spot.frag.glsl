@@ -49,6 +49,8 @@ void main()
     }
 
     fColor = vec4(0,0,0,1);
+    //fColor = vec4((normalize(fNormal) + 1) * .5,1);
+    //return;
 
     for (int i=0;i<numLights;i++)
     {
