@@ -268,7 +268,7 @@ namespace sgraph {
 
           hit.time = tHit;
           hit.intersection = obj.modelview * objSpaceIntersection; //ray.start + tHit * ray.direction;
-          hit.normal = glm::normalize(obj.normalMat * objSpaceNormal);
+          hit.normal = glm::normalize(glm::vec3(obj.normalMat * objSpaceNormal));
           hit.mat = &obj.mat;
           hit.texture = obj.texture;
         }

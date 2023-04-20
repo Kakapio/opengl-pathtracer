@@ -15,14 +15,16 @@ ambient 1 0 0
 diffuse 1 0 0
 specular 1 .8 .8
 shininess 1
+absorption 0.75
+reflection 0.25
 end-material
 
 material sMat
 ambient 0.1804 0.7137 0.8588
 diffuse 0.1804 0.7137 0.8588
 specular 0.1804 0.7137 0.8588
-absorption 0.5
-reflection 0.5
+absorption 0.25
+reflection 0.75
 transparency 0
 shininess 50
 
