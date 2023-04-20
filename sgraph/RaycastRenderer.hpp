@@ -534,8 +534,16 @@ namespace sgraph {
             //absorbColor = texColor;
             //absorbColor = glm::vec4(hit.texCoord.s,hit.texCoord.t,0,1);
 
-            if (maxBounces > 0) {
+            if (maxBounces > 0 && hit.mat->getAbsorption() <= 0.999f) {
+              Ray3D reflectionRay(fPosition, hit.reflection);
+              HitRecord reflectionHit;
+              raycast(reflectionRay, reflectionHit);
 
+              reflectColor = shade(reflectionHit, maxBounces - 1);
+
+              fColor = absorbColor * hit.mat->getAbsorption()
+                       + reflectColor * hit.mat->getReflection()
+                       + transparencyColor * hit.mat->getTransparency();
             }
             else {
               fColor = absorbColor;
@@ -565,7 +573,7 @@ namespace sgraph {
                 for (int ii = 0; ii < width; ++ii) {
                     HitRecord& hit = rayHits[jj][ii];
                     if (hit.time < MaxFloat) {
-                        pixelData[jj][ii] = shade(hit) * 255.f;
+                        pixelData[jj][ii] = shade(hit, 10) * 255.f;
                         // glm::vec3(255.0f, 255.0f, 255.0f);
                         // pixelData[jj][ii] = showNormals(hit);
                     }
