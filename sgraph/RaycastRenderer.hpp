@@ -26,6 +26,7 @@
 #include "glm/geometric.hpp"
 #include "glm/gtx/wrap.hpp"
 
+#include <glm/glm.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
@@ -453,6 +454,9 @@ namespace sgraph {
                 else if (obj.objType == "cylinder") raycastCylinder(ray, objSpaceRay, hit, obj);
                 else if (obj.objType == "cone") raycastCone(ray, objSpaceRay, hit, obj);
             }
+            if (hit.time == MaxFloat) return;
+
+            hit.reflection = glm::reflect(glm::vec3(ray.direction), hit.normal);
         }
 
         inline static glm::vec3 compMul(const glm::vec3& lhs, const glm::vec3& rhs) {
@@ -463,7 +467,7 @@ namespace sgraph {
             return (hit.normal + glm::vec3(1., 1., 1.)) * 0.5f * 255.f;
         }
 
-        glm::vec3 shade(HitRecord& hit) {
+        glm::vec3 shade(HitRecord& hit, int maxBounces = 0) {
             glm::vec3& fPosition = hit.intersection;
             glm::vec3& fNormal = hit.normal;
             glm::vec3 fColor(0.f,0.f,0.f);
@@ -471,6 +475,8 @@ namespace sgraph {
             glm::vec3 normalView(0.f,0.f,0.f);
             glm::vec3 ambient(0.f,0.f,0.f), diffuse(0.f,0.f,0.f), specular(0.f,0.f,0.f);
             float nDotL,rDotV;
+
+            glm::vec3 absorbColor(0.f,0.f,0.f), reflectColor(0.f,0.f,0.f), transparencyColor(0.f,0.f,0.f);
 
             for (auto& light : lights)
             {
@@ -519,14 +525,21 @@ namespace sgraph {
                 diffuse = {0., 0., 0.};
                 specular = {0., 0., 0.};
               }
-              fColor = fColor + ambient + diffuse + specular;
+              absorbColor = absorbColor + ambient + diffuse + specular;
             }
 
             glm::vec3 texColor = glm::vec3(hit.texture->getColor(hit.texCoord.s, hit.texCoord.t)) / 255.f;
 
-            fColor = compMul(fColor, texColor);
-            //fColor = texColor;
-            //fColor = glm::vec4(hit.texCoord.s,hit.texCoord.t,0,1);
+            absorbColor = compMul(absorbColor, texColor);
+            //absorbColor = texColor;
+            //absorbColor = glm::vec4(hit.texCoord.s,hit.texCoord.t,0,1);
+
+            if (maxBounces > 0) {
+
+            }
+            else {
+              fColor = absorbColor;
+            }
 
             return fColor;
         }
@@ -544,6 +557,7 @@ namespace sgraph {
                     Ray3D ray = screenSpaceToViewSpace(width, height, glm::vec2(ii,height-jj), glm::radians(30.0));
 
                     raycast(ray, hitsRow[ii]);
+
                 }
             }
 
