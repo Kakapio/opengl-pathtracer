@@ -276,6 +276,22 @@ namespace sgraph {
             hit.normal = glm::normalize(glm::vec3(obj.normalMat * objSpaceNormal));
             hit.mat = &obj.mat;
             hit.texture = obj.texture;
+
+            // Use the normal to tell what face we are on.
+            if (objSpaceNormal.y > 0)
+                hit.texCoord = glm::vec2(objSpaceIntersection.x * 0.25f + 0.375f, objSpaceIntersection.z * -0.25f + 0.375f);
+            else if (objSpaceNormal.y < 0)
+                hit.texCoord = glm::vec2(objSpaceIntersection.x * 0.25f + 0.375f, objSpaceIntersection.z * 0.25f + 0.875f);
+            else if (objSpaceNormal.z > 0)
+                hit.texCoord = glm::vec2(objSpaceIntersection.x * -0.25f + 0.875f, objSpaceIntersection.y * -0.25f + 0.625f);
+            else if (objSpaceNormal.z < 0)
+                hit.texCoord = glm::vec2(objSpaceIntersection.x * 0.25f + 0.375f, objSpaceIntersection.y * -0.25f + 0.625f);
+            else if (objSpaceNormal.x > 0)
+                hit.texCoord = glm::vec2(objSpaceIntersection.z * 0.25f + 0.625f, objSpaceIntersection.y * -0.25f + 0.625f);
+            else if (objSpaceNormal.x < 0)
+                hit.texCoord = glm::vec2(objSpaceIntersection.z * -0.25f + 0.125, objSpaceIntersection.y * -0.25f + 0.625f);
+
+            hit.texCoord.t *= -1.0f;
         }
 
         void raycastSphere(Ray3D &objSpaceRay, HitRecord &hit, RaycastObj &obj) {

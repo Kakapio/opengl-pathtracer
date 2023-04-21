@@ -4,14 +4,14 @@ instance box models/box-outside.obj
 #material
 material mat-node-3-0
 emission 0 0 0
-ambient 1 0 0
-diffuse 1 0 0
-specular 1 0 0
+ambient 1 1 1
+diffuse 1 1 1
+specular 1 1 1
 shininess 0
 end-material
 
 #texture
-texture tex-node-3-0 textures/checkerboard-busy-box.ppm
+texture tex-node-3-0 textures/die.ppm
 
 #the root
 group node-1-0 root
@@ -24,3 +24,13 @@ add-child node-3-0 node-2-0
 add-child node-2-0 node-1-0
 assign-root node-1-0
 
+light lamp1
+ambient 0.3 0.3 0.3
+diffuse 0.6 0.6 0.6
+specular 0.3 0.3 0.3
+position 15 25 15
+direction 0 0 0
+spotcutoff 0
+end-light
+
+assign-light node-1-0 lamp1
