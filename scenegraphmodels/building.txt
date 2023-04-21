@@ -12,6 +12,8 @@ end-material
 material turret-mat
 ambient 0.55 0.3 0.12
 diffuse 0.55 0.3 0.12
+absorption .7
+reflection .3
 end-material
 
 material roof-mat
