@@ -1,0 +1,204 @@
+#all the instances
+instance cone models/cone.obj
+instance sphere models/sphere.obj
+instance cylinder models/cylinder.obj
+instance box models/box-outside.obj
+
+# body ==================================================
+
+#material
+material m-body
+emission 0 0 0
+ambient 0.9608 0.8039 0.0196
+diffuse 0.9608 0.8039 0.0196
+specular 1 1 1
+absorption 0.85
+reflection 0.15
+end-material
+
+light globalLight
+ambient 0.3 0.3 0.3
+diffuse 0.7 0.7 0.7
+specular 0.6 0.6 0.6
+position 2 25 10
+end-light
+
+#the root
+group root root
+scale s-body s-body 8 16 8
+translate t-body t-body 0 -4 0
+leaf body body instanceof cone #comment here?
+assign-light root globalLight
+
+assign-material body m-body
+
+add-child body s-body
+add-child s-body t-body
+add-child t-body root
+
+assign-root root
+
+# eye ==================================================
+
+material m-eye
+emission 0 0 0
+ambient 1 1 1
+diffuse 1 1 1
+specular 1 1 1
+absorption 0.95
+reflection 0.05
+end-material
+
+scale s-eye s-eye 2.2 1.3 1.4
+translate t-eye t-eye 0 2 3.3
+translate t-eye-off t-eye-off 0 0 0.8
+leaf eye eye instanceof sphere
+assign-material eye m-eye
+
+group g-eye g-eye
+add-child eye s-eye
+add-child s-eye t-eye-off
+add-child t-eye-off g-eye
+add-child g-eye t-eye
+add-child t-eye root
+
+# pupil ==================================================
+material m-pupil
+emission 0 0 0
+ambient 0 0 0
+diffuse 0 0 0
+specular 1 1 1
+absorption 0.4
+reflection 0.6
+end-material
+
+scale s-pupil s-pupil 0.65 0.6 0.4
+translate t-pupil t-pupil 0 0 1.85
+leaf pupil pupil instanceof sphere
+assign-material pupil m-pupil
+
+add-child pupil s-pupil
+add-child s-pupil t-pupil
+add-child t-pupil g-eye
+
+# eyelashes ==================================================
+material m-eyelash
+emission 0 0 0
+ambient 0 0 0
+diffuse 0 0 0
+specular 0.5 0.5 0.5
+end-material
+
+scale s-eyelash1 s-eyelash1 0.1 0.65 0.1
+translate t-eyelash1 t-eyelash1 0 1 1.4
+leaf eyelash1 eyelash1 instanceof cylinder
+assign-material eyelash1 m-eyelash
+
+add-child eyelash1 s-eyelash1
+add-child s-eyelash1 t-eyelash1
+add-child t-eyelash1 g-eye
+
+copy eyelash2 s-eyelash1
+translate t-eyelash2 t-eyelash2 0.44 0.8 1.4
+add-child eyelash2 t-eyelash2
+add-child t-eyelash2 g-eye
+
+copy eyelash3 s-eyelash1
+translate t-eyelash3 t-eyelash3 -0.44 0.8 1.4
+add-child eyelash3 t-eyelash3
+add-child t-eyelash3 g-eye
+
+# mirrors ==================================================
+
+material m-shiny
+ambient 0.8 0.8 0.8
+diffuse 0.8 0.8 0.8
+specular 0.8 0.8 0.8
+absorption 0.1
+reflection 0.9
+transparency 0
+shininess 50
+end-material
+
+scale s-box1 s-box1 1 60 80
+translate t-box1 t-box1 -20 0 10
+leaf box1 box1 instanceof box
+add-child box1 s-box1
+add-child s-box1 t-box1
+add-child t-box1 root
+assign-material box1 m-shiny
+
+copy box2 s-box1
+translate t-box2 t-box2 20 0 10
+add-child box2 t-box2
+add-child t-box2 root
+
+scale s-box3 s-box3 80 60 1
+translate t-box3 t-box3 0 0 -20
+leaf box3 box3 instanceof box
+add-child box3 s-box3
+add-child s-box3 t-box3
+add-child t-box3 root
+assign-material box3 m-shiny
+
+copy box4 s-box3
+translate t-box4 t-box4 0 0 40
+add-child box4 t-box4
+add-child t-box4 root
+
+# hat ==================================================
+material m-hat
+emission 0 0 0
+ambient 0.1 0.1 0.1
+diffuse 0.1 0.1 0.1
+specular 0.1 0.1 0.1
+end-material
+
+material m-hatacc
+emission 0 0 0
+ambient 0.4 0.1 0.1
+diffuse 0.4 0.1 0.1
+specular 0.1 0.1 0.1
+end-material
+
+scale s-hat s-hat 4 0.3 4
+translate t-hat t-hat 0 8 0
+leaf hatbot hatbot instanceof cylinder
+add-child hatbot s-hat
+add-child s-hat t-hat
+add-child t-hat root
+assign-material hatbot m-hat
+
+scale s-hatacc s-hatacc 2.2 1 2.2
+translate t-hatacc t-hatacc 0 8 0
+leaf hatacc hatacc instanceof cylinder
+add-child hatacc s-hatacc
+add-child s-hatacc t-hatacc
+add-child t-hatacc root
+assign-material hatacc m-hatacc
+
+scale s-tophat s-tophat 2.1 5 2.1
+translate t-tophat t-tophat 0 8 0
+leaf tophat tophat instanceof cylinder
+add-child tophat s-tophat
+add-child s-tophat t-tophat
+add-child t-tophat root
+assign-material tophat m-hat
+
+# legs ==================================================
+scale s-leg s-leg .5 8 .5
+translate t-leg t-leg -2 -4 0
+rotate r-leg r-leg 180 0 0 1
+leaf monkey monkey instanceof cylinder
+group g-leg g-leg
+add-child monkey g-leg
+add-child g-leg s-leg
+add-child s-leg r-leg
+add-child r-leg t-leg
+add-child t-leg root
+assign-material leg m-hat
+
+copy leg2 r-leg
+translate t-leg2 t-leg2 2 -4 0
+add-child leg2 t-leg2
+add-child t-leg2 root
