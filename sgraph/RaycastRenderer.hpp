@@ -18,6 +18,7 @@
 #include <cmath>
 #include <stack>
 #include <iostream>
+#include <thread>
 #include <unordered_map>
 #include "../Ray3D.hpp"
 #include <vector>
@@ -620,11 +621,8 @@ namespace sgraph {
             return fColor;
         }
 
-        void raytrace(int width, int height, stack<glm::mat4> &mv) {
-            rayHits.resize(height);
-            pixelData.resize(height);
-
-            for (int jj = 0; jj < height; ++jj) {
+        void partition(int width, int height, int start, int end) {
+            for (int jj = start; jj < end; ++jj) {
                 vector<HitRecord> &hitsRow = rayHits[jj];
                 hitsRow.resize(width);
                 pixelData[jj].resize(width);
@@ -634,18 +632,32 @@ namespace sgraph {
 
                     raycast(ray, hitsRow[ii]);
 
+                    if (hitsRow[ii].time < MaxFloat)
+                      pixelData[jj][ii] = shade(hitsRow[ii], 10) * 255.f;
                 }
             }
+        }
+
+        void raytrace(int width, int height, stack<glm::mat4> &mv) {
+            rayHits.resize(height);
+            pixelData.resize(height);
 
             for (int jj = 0; jj < height; ++jj) {
-                for (int ii = 0; ii < width; ++ii) {
-                    HitRecord &hit = rayHits[jj][ii];
-                    if (hit.time < MaxFloat) {
-                        pixelData[jj][ii] = shade(hit, 10) * 255.f;
-                        // glm::vec3(255.0f, 255.0f, 255.0f);
-                        // pixelData[jj][ii] = showNormals(hit);
-                    }
-                }
+                rayHits[jj].resize(width);
+                pixelData[jj].resize(width);
+            }
+
+
+            int partitions = 4;
+            std::vector<std::thread> threads;
+            for (int ii = 0; ii < partitions; ++ii) {
+                threads.emplace_back([this](int width, int height, int start, int end) {
+                    partition(width, height, start, end);
+                  }, width, height, ii * (height / partitions), (ii + 1) * (height / partitions) - 1);
+            }
+
+            for (auto& thread : threads) {
+              thread.join();
             }
 
             std::ofstream op(outfileLoc);
