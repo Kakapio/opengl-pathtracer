@@ -630,7 +630,7 @@ namespace sgraph {
                     raycast(ray, hitsRow[ii]);
 
                     if (hitsRow[ii].time < MaxFloat)
-                      pixelData[jj][ii] = shade(hitsRow[ii], 300) * 255.f;
+                      pixelData[jj][ii] = shade(hitsRow[ii], 30) * 255.f;
                 }
             }
         }
