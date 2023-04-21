@@ -25,6 +25,7 @@
 #include "glm/ext/quaternion_geometric.hpp"
 #include "glm/geometric.hpp"
 #include "glm/gtx/wrap.hpp"
+#include "execution"
 
 #include <glm/glm.hpp>
 
@@ -517,6 +518,7 @@ namespace sgraph {
             return (hit.normal + glm::vec3(1., 1., 1.)) * 0.5f * 255.f;
         }
 
+        // Gets called for each pixel after raycasting.
         glm::vec3 shade(HitRecord &hit, int maxBounces = 0) {
             glm::vec3 &fPosition = hit.intersection;
             glm::vec3 &fNormal = hit.normal;
@@ -622,9 +624,6 @@ namespace sgraph {
                 for (int ii = 0; ii < width; ++ii) {
                     HitRecord &hit = rayHits[jj][ii];
                     if (hit.time < MaxFloat) {
-                        if (jj == 350 && ii == 400) {
-                            pixelData[jj][ii] = shade(hit, 10) * 255.f;
-                        }
                         pixelData[jj][ii] = shade(hit, 10) * 255.f;
                         // glm::vec3(255.0f, 255.0f, 255.0f);
                         // pixelData[jj][ii] = showNormals(hit);
@@ -632,10 +631,6 @@ namespace sgraph {
                 }
             }
 
-
-            // TODO: export to file 'outfileLoc'
-            // PPMImageExporter ppmExporter;
-            // ppmExporter.export(outfileLoc, width, height, pixelData);
             std::ofstream op(outfileLoc);
 
             //read in the word P3

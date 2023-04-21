@@ -17,6 +17,8 @@ using namespace std;
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <chrono>
+#include <ctime>
 #include "sgraph/GLScenegraphRenderer.h"
 #include "VertexAttrib.h"
 
@@ -315,11 +317,16 @@ void View::closeWindow() {
 
 void View::output_raytrace(sgraph::IScenegraph *scenegraph, Camera *activeCamera) {
     cout << "Attempting to output raytrace." << endl;
+    auto startTime = std::chrono::system_clock::now();
+
     modelview.push(glm::mat4(1.0));
     modelview.top() *= activeCamera->GetViewMatrix();
     raycastRenderer = new sgraph::RaycastRenderer(textures, modelview,lights,"output_render.ppm");
     scenegraph->getRoot()->accept(raycastRenderer);
     raycastRenderer->raytrace(800, 800, modelview);
     modelview.pop();
-    cout << "Generated raytrace output." << endl;
+
+    std::chrono::duration<double> elapsedTime = std::chrono::system_clock::now() - startTime;
+    cout << "Generated raytrace output in " << elapsedTime.count() << " seconds" << endl;
+
 }
