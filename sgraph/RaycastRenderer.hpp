@@ -474,6 +474,23 @@ namespace sgraph {
             hit.normal = glm::normalize(normal);
             hit.mat = &obj.mat;
             hit.texture = obj.texture;
+
+            float theta = atan2f(objSpaceIntersection.z, objSpaceIntersection.x);
+
+            // Gives us 270 instead of -90. No negative angles.
+            theta = -theta;
+            if (theta < 0.0f) {
+              theta += glm::radians(360.0f);
+            }
+
+            if (objSpaceIntersection.y < 0.001f) {
+                hit.texCoord = glm::vec2(objSpaceIntersection.x * 0.25f + 0.25f, objSpaceIntersection.z * 0.25f + 0.25f);
+            }
+            else
+            {
+                hit.texCoord = glm::vec2(theta / glm::radians(360.0f),
+                                         0.5f * objSpaceIntersection.y);
+            }
         }
 
         void raycast(Ray3D &ray, HitRecord &hit) {
