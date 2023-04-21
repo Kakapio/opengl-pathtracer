@@ -292,6 +292,7 @@ namespace sgraph {
                 hit.texCoord = glm::vec2(objSpaceIntersection.z * -0.25f + 0.125, objSpaceIntersection.y * -0.25f + 0.625f);
 
             hit.texCoord.t *= -1.0f;
+            hit.texCoord.t += 1.0f;
         }
 
         void raycastSphere(Ray3D &objSpaceRay, HitRecord &hit, RaycastObj &obj) {
