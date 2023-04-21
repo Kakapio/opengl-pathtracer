@@ -1,0 +1,54 @@
+#all the instances
+instance cone models/cone.obj
+instance box models/box-outside.obj
+
+#material
+material orange
+emission 0 0 0
+ambient 1 .4 0
+diffuse 1 .4 0
+specular 1 1 1
+shininess 25
+end-material
+
+material white
+emission 0 0 0
+ambient 1 1 1
+diffuse 1 1 1
+specular 1 1 1
+shininess 25
+end-material
+
+light globalLight
+ambient 0.3 0.3 0.3
+diffuse 0.7 0.7 0.7
+specular 1 1 1
+position 10 10 10
+end-light
+
+
+group root root
+
+scale coScale coScale 2 8 2
+leaf co co instanceof cone
+
+assign-material co orange
+add-child co coScale
+add-child coScale root
+
+scale cwScale cwScale 2.07 7 2.07
+leaf cw cw instanceof cone
+
+assign-material cw white 
+add-child cw cwScale
+add-child cwScale root
+
+scale baseScale baseScale 7 .25 7
+leaf base base instanceof box
+
+assign-material base orange
+add-child base baseScale
+add-child baseScale root
+
+assign-root root
+assign-light root globalLight
