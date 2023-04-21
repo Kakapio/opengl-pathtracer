@@ -650,7 +650,7 @@ namespace sgraph {
             for (int ii = 0; ii < partitions; ++ii) {
                 threads.emplace_back([this](int width, int height, int start, int end) {
                     partition(width, height, start, end);
-                  }, width, height, ii * (height / partitions), (ii + 1) * (height / partitions) - 1);
+                  }, width, height, ii * (height / partitions), (ii + 1) * (height / partitions));
             }
 
             for (auto& thread : threads) {
