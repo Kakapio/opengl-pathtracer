@@ -624,9 +624,6 @@ namespace sgraph {
         void partition(int width, int height, int start, int end) {
             for (int jj = start; jj < end; ++jj) {
                 vector<HitRecord> &hitsRow = rayHits[jj];
-                hitsRow.resize(width);
-                pixelData[jj].resize(width);
-
                 for (int ii = 0; ii < width; ++ii) {
                     Ray3D ray = screenSpaceToViewSpace(width, height, glm::vec2(ii, height - jj), glm::radians(30.0));
 
