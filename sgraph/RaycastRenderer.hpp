@@ -397,7 +397,7 @@ namespace sgraph {
             else
             {
                 hit.texCoord = glm::vec2(theta / glm::radians(360.0f),
-                                         1 - 0.5f * objSpaceIntersection.y);
+                                         0.5f * objSpaceIntersection.y);
             }
         }
 
@@ -561,8 +561,8 @@ namespace sgraph {
 
             glm::vec3 texColor = glm::vec3(hit.texture->getColor(hit.texCoord.s, hit.texCoord.t)) / 255.f;
 
-            //absorbColor = compMul(absorbColor, texColor);
-            absorbColor = texColor;
+            absorbColor = compMul(absorbColor, texColor);
+            //absorbColor = texColor;
             //absorbColor = glm::vec4(hit.texCoord.s,hit.texCoord.t,0,1);
 
             if (maxBounces > 0 && hit.mat->getAbsorption() <= 0.999f) {
