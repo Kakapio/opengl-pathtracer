@@ -114,8 +114,8 @@ material m-shiny
 ambient 0.8 0.8 0.8
 diffuse 0.8 0.8 0.8
 specular 0.8 0.8 0.8
-absorption 0.1
-reflection 0.9
+absorption 0.01
+reflection 0.99
 transparency 0
 shininess 50
 end-material

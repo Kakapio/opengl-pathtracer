@@ -323,7 +323,7 @@ void View::output_raytrace(sgraph::IScenegraph *scenegraph, Camera *activeCamera
     modelview.top() *= activeCamera->GetViewMatrix();
     raycastRenderer = new sgraph::RaycastRenderer(textures, modelview,lights,"output_render.ppm");
     scenegraph->getRoot()->accept(raycastRenderer);
-    raycastRenderer->raytrace(800, 800, modelview);
+    raycastRenderer->raytrace(1600, 1600, modelview);
     modelview.pop();
 
     std::chrono::duration<double> elapsedTime = std::chrono::system_clock::now() - startTime;
