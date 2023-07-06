@@ -1,4 +1,4 @@
-Our render scene features a cube, sphere, and spotlight.
-There is also our OpenGL render scene which can be started by adding the -gl parameter like so:
-
-./Scenegraphs -gl scenegraphmodels/boxAndSphere.txt
+This project is a raytracer I wrote last spring as a capstone for my degree requirements.
+I wrote it in collaboration with another student and we spent a lot of time pair-programming
+to build out our functionality. It was a very intensive project that involved both physics,
+low-level programming, and software engineering.
